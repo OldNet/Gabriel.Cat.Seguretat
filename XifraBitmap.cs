@@ -41,10 +41,14 @@ namespace Gabriel.Cat.Seguretat
         private static void INormalXifrat(Bitmap img, NivellXifrat nivell, byte[] dades)
         {
             //pone los bytes en la imagen
+            byte[] imgBytes = img.GetBytes();
+            //pongo los datos
+            img.SetBytes(imgBytes);
         }
         private static byte[] INormalDesXifrat(Bitmap img, NivellXifrat nivell)
         {
             Llista<byte> dadesTrobades = new Llista<byte>();
+            byte[] imgBytes = img.GetBytes();
             //trec les dades
 
             return dadesTrobades.ToTaula();
