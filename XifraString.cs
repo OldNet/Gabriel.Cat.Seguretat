@@ -23,7 +23,7 @@ namespace Gabriel.Cat.Seguretat
             string textXifrat = null;
             switch (xifrat)
             {
-                case XifratText.TextDisimulat:textXifrat = ITextDisimulatXifra(text, nivell, password);break;
+                case XifratText.TextDisimulat: textXifrat = ITextDisimulatXifra(text, nivell, password); break;
             }
             return textXifrat;
         }
@@ -48,8 +48,7 @@ namespace Gabriel.Cat.Seguretat
                 int posicionPassword = 0;
                 for (int i = 0; i < text.Length; i++)
                 {
-                    //mirar de bajar el numero de caracteres...
-                    for (int j = 0, finalBasura = ((int)password[posicionPassword])%71 * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
+                    for (int j = 0, finalBasura = ((int)password[posicionPassword]) % 71 * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
                         textXifrat.Append((char)(MiRandom.Next(127) + 32));
                     textXifrat.Append(text[i]);//pongo el caracter a disimular
                     posicionPassword++;
@@ -62,9 +61,8 @@ namespace Gabriel.Cat.Seguretat
         }
         private static string ITextDisimulatDesxifra(string text, NivellXifrat nivell, string password)
         {
-  //por mejorar...
-                //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
-                StringBuilder textDesxifrat = new StringBuilder();
+            //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
+            StringBuilder textDesxifrat = new StringBuilder();
             if (text != "" && password != "")
             {
                 int posicionPassword = 0;
@@ -73,7 +71,7 @@ namespace Gabriel.Cat.Seguretat
                 {
                     if (posicion < text.Length)
                         textDesxifrat.Append(text[posicion]);
-                    posicion += (((int)password[posicionPassword])%71 * (int)nivell + 1) + 1;//me salto la basura
+                    posicion += (((int)password[posicionPassword]) % 71 * (int)nivell + 1) + 1;//me salto la basura
                     posicionPassword++;
                     if (posicionPassword == password.Length)
                         posicionPassword = 0;
