@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using Gabriel.Cat;
+using Gabriel.Cat.Extension;
 using System.Collections;
 
 namespace Gabriel.Cat.Seguretat
