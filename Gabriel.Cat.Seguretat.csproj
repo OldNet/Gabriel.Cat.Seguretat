@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Gabriel.Cat.Utilitats">
-      <HintPath>..\Gabriel.Cat.Utilitats\bin\Debug\Gabriel.Cat.Utilitats.dll</HintPath>
+      <HintPath>..\Gabriel.Cat.Utilitats\bin\Release\Gabriel.Cat.Utilitats.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
