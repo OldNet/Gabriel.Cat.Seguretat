@@ -75,15 +75,17 @@ namespace Gabriel.Cat.Seguretat
         private static string ITextDisimulatXifra(string text, NivellXifrat nivell, string password,char[] caracteres)
         {
             //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
+            const int MOD = 71;
             StringBuilder textXifrat = new StringBuilder();
-
+            int posicionPassword = 0;
+            
             if (text != "" && password != "")
             {
                 text += caracteres[MiRandom.Next(caracteres.Length)];//lo pongo porque sino queda a la vista
-                int posicionPassword = 0;
+               
                 for (int i = 0; i < text.Length; i++)
                 {
-                    for (int j = 0, finalBasura = ((int)password[posicionPassword]) % 71 * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
+                    for (int j = 0, finalBasura = ((int)password[posicionPassword]) % MOD * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
                         textXifrat.Append(caracteres[MiRandom.Next(caracteres.Length)]);
                     textXifrat.Append(text[i]);//pongo el caracter a disimular
                     posicionPassword++;
@@ -97,16 +99,19 @@ namespace Gabriel.Cat.Seguretat
         private static string ITextDisimulatDesxifra(string text, NivellXifrat nivell, string password)
         {
             //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
+            const int MOD = 71;
             StringBuilder textDesxifrat = new StringBuilder();
+            int posicionPassword = 0;
+            
             if (text != "" && password != "")
             {
-                int posicionPassword = 0;
-                int posicion = (((int)password[posicionPassword++]) % 71 * (int)nivell + 1);//me salto la basura
+                
+                int posicion = (((int)password[posicionPassword++]) % MOD * (int)nivell + 1);//me salto la basura
                 while (posicion < text.Length)
                 {
                     if (posicion < text.Length)
                         textDesxifrat.Append(text[posicion]);
-                    posicion += (((int)password[posicionPassword]) % 71 * (int)nivell + 1) + 1;//me salto la basura
+                    posicion += (((int)password[posicionPassword]) % MOD * (int)nivell + 1) + 1;//me salto la basura
                     posicionPassword++;
                     if (posicionPassword == password.Length)
                         posicionPassword = 0;
