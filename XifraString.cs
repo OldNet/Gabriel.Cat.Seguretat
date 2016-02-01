@@ -180,6 +180,7 @@ namespace Gabriel.Cat.Seguretat
         }
         public static string Xifra(this string textSenseXifrar,XifratText[] xifratText,XifratPassword[] xifratPassword, XifratMultiKey escogerKey, NivellXifrat nivell,string[] passwords,char caracterCanvi)
         {
+            //el caracter no se puede usar en el textoSenseXifrar....lo paso a hexadecimal? y luego el caracter tiene que ser hexadecimal...
             if (xifratText == null || xifratText.Length == 0)
                 throw new ArgumentException("es necessita un metode per xifrar");
             if (passwords == null || passwords.Length == 0 || String.IsNullOrEmpty(passwords[0]))
@@ -212,20 +213,21 @@ namespace Gabriel.Cat.Seguretat
         }
 
         //desxifro
-        public static string Desxifra(this string textXifrat, XifratText xifratText, XifratPassword xifratPassword, NivellXifrat nivell, string[] passwords, char caracterCanvi)
+        public static string Desxifra(this string textXifrat, XifratText xifratText, XifratPassword xifratPassword, XifratMultiKey escogerKey, NivellXifrat nivell, string[] passwords, char caracterCanvi)
         {
-            return Desxifra(textXifrat, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, nivell, passwords, caracterCanvi);
+            return Desxifra(textXifrat, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, escogerKey, nivell, passwords, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, XifratText[] xifratText, XifratPassword xifratPassword, NivellXifrat nivell, string[] passwords, char caracterCanvi)
+        public static string Desxifra(this string textXifrat, XifratText[] xifratText, XifratPassword xifratPassword, XifratMultiKey escogerKey, NivellXifrat nivell, string[] passwords, char caracterCanvi)
         {
-            return Desxifra(textXifrat, xifratText, new XifratPassword[] { xifratPassword }, nivell, passwords, caracterCanvi);
+            return Desxifra(textXifrat, xifratText, new XifratPassword[] { xifratPassword }, escogerKey, nivell, passwords, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, XifratText xifratText, XifratPassword[] xifratPassword, NivellXifrat nivell, string[] passwords, char caracterCanvi)
+        public static string Desxifra(this string textXifrat, XifratText xifratText, XifratPassword[] xifratPassword, XifratMultiKey escogerKey, NivellXifrat nivell, string[] passwords, char caracterCanvi)
         {
-            return Desxifra(textXifrat, new XifratText[] { xifratText }, xifratPassword, nivell, passwords, caracterCanvi);
+            return Desxifra(textXifrat, new XifratText[] { xifratText }, xifratPassword, escogerKey, nivell, passwords, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, XifratText[] xifratText, XifratPassword[] xifratPassword, NivellXifrat nivell, string[] passwords, char caracterCanvi)
+        public static string Desxifra(this string textXifrat, XifratText[] xifratText, XifratPassword[] xifratPassword, XifratMultiKey escogerKey, NivellXifrat nivell, string[] passwords, char caracterCanvi)
         {
+            //poner lo del orden escogerKey,
             if (xifratText == null || xifratText.Length == 0)
                 throw new ArgumentException("es necessita un metode per xifrar");
             if (passwords == null || passwords.Length == 0 || String.IsNullOrEmpty(passwords[0]))
