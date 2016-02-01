@@ -43,6 +43,22 @@ namespace Gabriel.Cat.Seguretat
     }
     public static class XifraBitmap
     {
+        public static Bitmap Xifra(this string text, XifratImg xifrat, NivellXifrat nivell)
+        {
+
+            return Serializar.GetBytes(text).Xifra(xifrat, nivell);
+        }
+        public static Bitmap Xifra(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
+        {
+            //por probar, mirar que lo haga bien :)
+            //    creo una imagen random que quepa lo que quiero
+            int totalBytesImg = dades.Length* ((int)nivell + 1);
+            int height = totalBytesImg / 2, width = totalBytesImg - height;
+            Bitmap imgRandom=new Bitmap(width,height);
+            imgRandom.RandomPixels();
+            imgRandom.Xifra(xifrat, nivell, dades);
+            return imgRandom;
+        }
         public static Bitmap Xifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, string text)
         {
             return img.Xifra(xifrat, nivell, Serializar.GetBytes(text));
@@ -74,6 +90,23 @@ namespace Gabriel.Cat.Seguretat
 
             return dades;
         }
+        private static byte[] Desxifra(byte[] imgBytes, NivellXifrat nivell)
+        {
+            bool[] dadesEnBits;
+            try {
+
+                const int BYTESLONG = 8;
+                bool[] bitsLong = new bool[BYTESLONG*BYTESLONG];
+
+                for (int i = BYTESLONG, j = 0, incremento = ((int)nivell + 1); j < BYTESLONG; i += incremento, j++)
+                    bitsLong[j] = imgBytes[i]%2!=0;
+                dadesEnBits = new bool[Serializar.ToLong(bitsLong.ToByteArray())];
+                for (long i = BYTESLONG *  ((int)nivell + 1)+ BYTESLONG, final = dadesEnBits.LongLength, j = 0, incremento = ((int)nivell + 1); j < final; i += incremento, j++)
+                    dadesEnBits[j] = imgBytes[i] % 2 != 0;//saco los bits de los datos :)
+            }
+            catch { dadesEnBits = new bool[0]; }//si no tiene nada devuelvo byte[0]
+            return dadesEnBits.ToByteArray();
+        }
         public static XifratImgNivell XifratImgINivell(this Bitmap img)
         {
             byte[] bytesImg = img.GetBytes();
@@ -94,83 +127,88 @@ namespace Gabriel.Cat.Seguretat
         }
         public static long MaxBytesXifrat(this Bitmap bmp,NivellXifrat nivell)
         {
-            return bmp.GetBytes().LongLength / (8 * ((int)nivell + 1));
+            return bmp.GetBytes().LongLength / (((int)nivell + 1));
         }
 
         private static void IXifra(Bitmap img, XifratImg xifrat, NivellXifrat nivell, byte[] dades)
         {
             //pone los bytes en la imagen
-            byte[] bytesIdentificador = Serializar.GetBytes((int)xifrat).AfegirValors(Serializar.GetBytes((int)nivell)).ToArray();
-            bool[] bitsIdentificador = bytesIdentificador.ToBits();
-            byte[] bytesImg = img.GetBytes();
-            bool[] imgBits = bytesImg.ToBits();
-            const int BITSBYTE = 8;
-            byte[] longitud = Serializar.GetBytes(dades.LongLength * BITSBYTE);
-            bool[] bitsLong = longitud.ToBits();
-            bool[] bitsAPoner =bitsLong.AfegirValors(dades.ToBits()).ToArray();
-            if (imgBits.LongLength < bitsAPoner.LongLength * ((int)nivell + 1)+bitsIdentificador.Length*8)
+            bool[] bitsIdentificador = Serializar.GetBytes((int)xifrat).AfegirValors(Serializar.GetBytes((int)nivell)).AfegirValors(Serializar.GetBytes(dades.Length)).ToBits();
+            bool[] bitsAPoner = dades.ToBits();
+              
+            if (img.LengthBytes() < (bitsAPoner.LongLength +bitsIdentificador.Length)*((int)nivell + 1))
                 throw new Exception("La imatge no pot contenir les dades amb el nivell de seguretat posat!");
-            for (int j = 0, i = 0, incremento = 8; i < bitsIdentificador.Length; j += incremento, i++)//pongo el identificador
+            unsafe
             {
-                if (bitsIdentificador[i])
+                img.TrataBytes((MetodoTratarBytePointer)((imgBytes) =>
                 {
-                    if (!imgBits[j])
-                    {
-                        imgBits[j] = true;
-                    }
-                }
-                else
+                    int longitudImg = img.LengthBytes();
+                    int auxByte = 0;
+                    for (int i = 0; i < bitsIdentificador.Length; i++)//pongo el identificador
                 {
-                    if (imgBits[j])
-                    {
-                        imgBits[j] = false;
+                        if (bitsIdentificador[i])
+                        {
+                            if (imgBytes[i]%2==0)
+                            {
+                             auxByte= imgBytes[i];
+                                //tiene que ser true
+                                if(auxByte%2==0)
+                                {
+                                    auxByte++;
+                                    imgBytes[i] =(byte)auxByte;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (imgBytes[i] % 2 != 0)
+                            {
+                                auxByte = imgBytes[i];
+                                //tiene que ser false
+                                if (auxByte % 2 != 0)
+                                {
+                                    auxByte--;
+                                    imgBytes[i] = (byte)auxByte;
+                                }
+                            }
+                        }
+
 
                     }
-                }
+                    for (int j = bitsIdentificador.Length, i = 0, incremento = ((int)nivell + 1); i < bitsAPoner.Length; j += incremento, i++)//pongo la longitud de los datos y luego los datos
+                {
+                        if (bitsAPoner[i])
+                        {
+                            if (imgBytes[j] % 2 != 0)
+                            {
+                                auxByte = imgBytes[j];
+                                //tiene que ser false
+                                if (auxByte % 2 == 0)
+                                {
+                                    auxByte++;
+                                    imgBytes[j] = (byte)auxByte;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            auxByte = imgBytes[j];
+                            //tiene que ser false
+                            if (auxByte % 2 != 0)
+                            {
+                                auxByte--;
+                                imgBytes[j] = (byte)auxByte;
+                            }
+                        }
+                    }
 
 
+                    }
+                ));
             }
-            for (int j = bitsIdentificador.Length * 8, i = 0, incremento = 8 * ((int)nivell + 1); i < bitsAPoner.Length; j += incremento, i++)//pongo la longitud de los datos y luego los datos
-            {
-                if (bitsAPoner[i])
-                {
-                    if (!imgBits[j])
-                    {
-                        imgBits[j] = true;
-                    }
-                }
-                else
-                {
-                    if (imgBits[j])
-                    {
-                        imgBits[j] = false;
 
-                    }
-                }
-
-
-            }
-
-            img.SetBytes(imgBits.ToByteArray());//actualizo la imagen con los datos
         }
-        private static byte[] Desxifra(byte[] imgBytes, NivellXifrat nivell)
-        {
-            bool[] dadesEnBits;
-            try {
 
-                const int INICIO = 64*8;
-                bool[] imgBits = imgBytes.ToBits();
-                const int BITSLONG = 64;
-                bool[] bitsLong = new bool[BITSLONG];
-
-                for (int i = INICIO, j = 0, incremento = 8 * ((int)nivell + 1); j < BITSLONG; i += incremento, j++)
-                    bitsLong[j] = imgBits[i];
-                dadesEnBits = new bool[Serializar.ToLong(bitsLong.ToByteArray())];
-                for (long i = BITSLONG * 8 * ((int)nivell + 1)+INICIO, final = dadesEnBits.LongLength, j = 0, incremento = 8 * ((int)nivell + 1); j < final; i += incremento, j++)
-                    dadesEnBits[j] = imgBits[i];//saco los bits de los datos :)
-            }catch { dadesEnBits = new bool[0]; }//si no tiene nada devuelvo byte[0]
-            return dadesEnBits.ToByteArray();
-        }
 
     }
 }
