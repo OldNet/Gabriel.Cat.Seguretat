@@ -51,7 +51,7 @@ namespace Gabriel.Cat.Seguretat
 			//por probar, mirar que lo haga bien :)
 			//    creo una imagen random que quepa lo que quiero
 			int totalBytesImg = (dades.Length* BITSBYTE) * ((int)nivell + 1) ;
-			int height = totalBytesImg / 2, width = totalBytesImg - height;
+			int height =Convert.ToInt32( Math.Sqrt(totalBytesImg)), width = (totalBytesImg / height)+1;
 			Bitmap imgRandom = new Bitmap(width, height);
 			imgRandom.RandomPixels();
 			imgRandom.Xifra(xifrat, nivell, dades);
@@ -66,6 +66,7 @@ namespace Gabriel.Cat.Seguretat
 			bool[] bitsAPoner;
 			int longitudImg;
 			int auxByte;
+			int longitud=dades.Length;
 			switch (xifrat) {
 			//le mezclo los datos
 				case XifratImg.Normal:/*dades = dades;*/
@@ -73,7 +74,7 @@ namespace Gabriel.Cat.Seguretat
 
 			}
 			//pone los bytes en la imagen
-			bitsAPoner = Serializar.GetBytes(dades.Length).AfegirValors(dades).ToBits();
+			bitsAPoner = Serializar.GetBytes(longitud).AfegirValors(dades).ToBits();
 			
 			if (img.LengthBytes() < bitsAPoner.Length * ((int)nivell + 1))
 				throw new Exception("La imatge no pot contenir les dades amb el nivell de seguretat posat!");
@@ -118,7 +119,7 @@ namespace Gabriel.Cat.Seguretat
 			bool[] bitsLongitudDades = new bool[ BITSBYTE * 4];
 			byte[] bytesLongitudDades;
 			int longitudDades;
-			int incremento = ((int)nivell + 1) * BITSBYTE;
+			int incremento = ((int)nivell + 1);
 			unsafe {
 				img.TrataBytes((MetodoTratarBytePointer)((bytesImg) => {
 				                                         	
@@ -128,9 +129,9 @@ namespace Gabriel.Cat.Seguretat
 					}
 					bytesLongitudDades = bitsLongitudDades.ToByteArray();
 					longitudDades = Serializar.ToInt(bytesLongitudDades);
-					dadesBits = new bool[longitudDades];
+					dadesBits = new bool[longitudDades*BITSBYTE];
 					//leo hasta acabar tal longitud
-					for (int i = incremento * bitsLongitudDades.Length, f = i + (dadesBits.Length * incremento), k = 0; k < dadesBits.Length / 8; i += incremento,k++) {
+					for (int i = incremento * bitsLongitudDades.Length, f = i + (dadesBits.Length * incremento), k = 0; i<f; i += incremento,k++) {
 						dadesBits[k] = bytesImg[i] % 2 != 0;
 					}
 					dades = dadesBits.ToByteArray();
