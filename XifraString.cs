@@ -95,7 +95,7 @@ namespace Gabriel.Cat.Seguretat
         #region TextDisimulat
         private static string ITextDisimulatXifra(string text, NivellXifrat nivell, string password,char[] caracteresUsados,char[] caracteresNoUsados=null)//lo malo es que esos caracteres no usados como bulto hacen cantar a las que sin cifrar...
         {
-
+//no se por que pero pierde los accentos...
             //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
             const int MOD = 71;
             const int MAXCHAR = 255;
