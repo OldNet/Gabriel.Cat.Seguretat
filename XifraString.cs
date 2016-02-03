@@ -2,6 +2,7 @@
 using System.Text;
 using Gabriel.Cat.Extension;
 using System.Linq;
+using System.Collections.Generic;
 //lo uso extendiendo string
 namespace Gabriel.Cat.Seguretat
 {
@@ -31,7 +32,7 @@ namespace Gabriel.Cat.Seguretat
 
     public static class XifraString
     {
-        delegate char MetodoCesar(char[] caracteresNoPermitidos,char caracterTexto);
+        delegate char MetodoCesar(char caracterePassword,char caracterTexto);
         const int MAXCHAR = 255, MINCHAR = 0;
 
 
@@ -126,10 +127,11 @@ namespace Gabriel.Cat.Seguretat
         //en desarollo...no funciona con todos los caracteres ASCII
         private static string CesarXifrar(string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
-
-            MetodoCesar metodoPonerCaracterValidoCifrar = (caracteresQueNoSePuedenUsar,caracterTexto) =>
+            SortedList<char, char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
+            MetodoCesar metodoPonerCaracterValidoCifrar = (caracterActualPassword, caracterTexto) =>
             {
-                while (caracteresQueNoSePuedenUsar.Contains(caracterTexto))
+                caracterTexto = (char)((caracterActualPassword + caracterTexto) % MAXCHAR);
+                while (diccionario.ContainsKey(caracterTexto))
                 {
                     if (caracterTexto == MAXCHAR)
                         caracterTexto = (char)MINCHAR;
@@ -138,13 +140,15 @@ namespace Gabriel.Cat.Seguretat
                 }
                 return caracterTexto;
             };
-            return Cesar(metodoPonerCaracterValidoCifrar, texto, password, nivell, ordre, caracteresNoPermitidos);
+            return MetodoCesarComun(metodoPonerCaracterValidoCifrar, texto, password, nivell, ordre);
         }
         private static string CesarDesxifrar(string textXifrat, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
-            MetodoCesar metodoPonerCaracterValidoDescifrar = (caracteresQueNoSePuedenUsar,caracterTexto) =>
+            SortedList<char,char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
+            MetodoCesar metodoPonerCaracterValidoDescifrar = (caracterActualPassword, caracterTexto) =>
             {
-                while (caracteresQueNoSePuedenUsar.Contains(caracterTexto))
+                caracterTexto = (char)(Math.Abs(caracterActualPassword - caracterTexto) % MAXCHAR);
+                while (diccionario.ContainsKey(caracterTexto))
                 {
                     if (caracterTexto == MINCHAR)
                         caracterTexto = (char)MAXCHAR;
@@ -153,14 +157,11 @@ namespace Gabriel.Cat.Seguretat
                 }
                 return caracterTexto;
             };
-            return Cesar(metodoPonerCaracterValidoDescifrar, textXifrat, password, nivell, ordre, caracteresNoPermitidos);
+            return MetodoCesarComun(metodoPonerCaracterValidoDescifrar, textXifrat, password, nivell, ordre);
         }
-        private static string Cesar(MetodoCesar metodo, string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
-        {
 
-            char caracterTexto, caracterActualPassword;
-            char[] caracteresPassword = password.ToCharArray();
-            text textoCifrado = "";
+        private static SortedList<char,char> ValidarCaracteresNoPermitidos(char[] caracteresNoPermitidos)
+        {
             if (caracteresNoPermitidos == null)
                 caracteresNoPermitidos = new char[0];
             else if (caracteresNoPermitidos.Length == MAXCHAR)
@@ -168,12 +169,21 @@ namespace Gabriel.Cat.Seguretat
                 if (caracteresNoPermitidos.Distinct().ToArray().Length == MAXCHAR)
                     throw new ArgumentException("Se han descartado todos los caracteres validos...");
             }
+
+            return caracteresNoPermitidos.ToSortedList();
+        }
+
+        private static string MetodoCesarComun(MetodoCesar metodo, string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu)
+        {
+
+            char caracterTexto, caracterActualPassword;
+            char[] caracteresPassword = password.ToCharArray();
+            text textoCifrado = "";
             for (int i = 0; i < texto.Length; i++)
             {
                 caracterActualPassword = caracteresPassword.DameElementoActual(ordre, i);
                 caracterTexto = texto[i];
-                caracterTexto = (char)((caracterActualPassword + caracterTexto) % MAXCHAR);
-                textoCifrado += metodo(caracteresNoPermitidos, caracterTexto);
+                textoCifrado += metodo(caracterActualPassword, caracterTexto);
             }
             return textoCifrado;
         }
