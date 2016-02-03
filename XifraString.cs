@@ -124,13 +124,16 @@ namespace Gabriel.Cat.Seguretat
             return textoDescifrado;
         }
         #region Cesar
-        //en desarollo...no funciona con todos los caracteres ASCII
         private static string CesarXifrar(string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
             SortedList<char, char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
+            int charAuxInt;
             MetodoCesar metodoPonerCaracterValidoCifrar = (caracterActualPassword, caracterTexto) =>
             {
-                caracterTexto = (char)((caracterActualPassword + caracterTexto) % MAXCHAR);
+            	charAuxInt=caracterTexto+((int)nivell*caracterActualPassword);
+            	if(charAuxInt>MAXCHAR)
+            		charAuxInt-=MAXCHAR;
+            	caracterTexto = (char)charAuxInt;
                 while (diccionario.ContainsKey(caracterTexto))
                 {
                     if (caracterTexto == MAXCHAR)
@@ -145,9 +148,13 @@ namespace Gabriel.Cat.Seguretat
         private static string CesarDesxifrar(string textXifrat, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
             SortedList<char,char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
+            int charAuxInt;
             MetodoCesar metodoPonerCaracterValidoDescifrar = (caracterActualPassword, caracterTexto) =>
             {
-                caracterTexto = (char)(Math.Abs(caracterActualPassword - caracterTexto) % MAXCHAR);
+            	charAuxInt=caracterTexto-((int)nivell*caracterActualPassword);
+            	if(charAuxInt<MINCHAR)
+            		charAuxInt+=MAXCHAR;//al ser negativo se restara
+                caracterTexto = (char)charAuxInt;
                 while (diccionario.ContainsKey(caracterTexto))
                 {
                     if (caracterTexto == MINCHAR)
