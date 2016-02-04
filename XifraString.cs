@@ -84,7 +84,7 @@ namespace Gabriel.Cat.Seguretat
                     textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres,objs[0]);
                     break;
                 case XifratText.Cesar:
-                    if (objs != null)
+                    if (objs.Length!=1)
                         textXifrat = CesarXifrar(text, password, nivell, objs[1], objs[0]);
                     else {
                         textXifrat = CesarXifrar(text, password, nivell);
