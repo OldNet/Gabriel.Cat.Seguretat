@@ -43,13 +43,11 @@ namespace Gabriel.Cat.Seguretat
 
 		public static Bitmap Xifra(this string text, XifratImg xifrat, NivellXifrat nivell)
 		{
-
 			return Serializar.GetBytes(text).Xifra(xifrat, nivell);
 		}
 		public static Bitmap Xifra(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
 		{
-			//por probar, mirar que lo haga bien :)
-			//    creo una imagen random que quepa lo que quiero
+            //hago una img con pixeles random
 			int totalBytesImg = (dades.Length* BITSBYTE) * ((int)nivell + 1) ;
 			int height =Convert.ToInt32( Math.Sqrt(totalBytesImg)), width = (totalBytesImg / height)+1;
 			Bitmap imgRandom = new Bitmap(width, height);
