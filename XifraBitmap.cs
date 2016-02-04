@@ -111,7 +111,7 @@ namespace Gabriel.Cat.Seguretat
 
 		public static byte[] Desxifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell)
 		{
-			
+		 	
 			bool[] dadesBits = null;
 			byte[] dades = null;
 			bool[] bitsLongitudDades = new bool[ BITSBYTE * 4];
