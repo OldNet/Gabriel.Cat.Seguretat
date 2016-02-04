@@ -133,11 +133,13 @@ namespace Gabriel.Cat.Seguretat
         #region Cesar
         private static string CesarXifrar(string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
+            const int FIX = 3;
             SortedList<char, char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
             int charAuxInt;
+            
             MetodoCesar metodoPonerCaracterValidoCifrar = (caracterActualPassword, caracterTexto) =>
             {
-            	charAuxInt=caracterTexto+((int)nivell*caracterActualPassword);
+            	charAuxInt=caracterTexto+(((int)(nivell)+ FIX )* caracterActualPassword);
             	if(charAuxInt>MAXCHAR)
             		charAuxInt-=MAXCHAR;
             	caracterTexto = (char)charAuxInt;
@@ -154,11 +156,12 @@ namespace Gabriel.Cat.Seguretat
         }
         private static string CesarDesxifrar(string textXifrat, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
+            const int FIX = 3;
             SortedList<char,char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
             int charAuxInt;
             MetodoCesar metodoPonerCaracterValidoDescifrar = (caracterActualPassword, caracterTexto) =>
             {
-            	charAuxInt=caracterTexto-((int)nivell*caracterActualPassword);
+            	charAuxInt=caracterTexto-(((int)(nivell) + FIX) * caracterActualPassword);
             	if(charAuxInt<MINCHAR)
             		charAuxInt+=MAXCHAR;//al ser negativo se restara
                 caracterTexto = (char)charAuxInt;
