@@ -65,6 +65,8 @@ namespace Gabriel.Cat.Seguretat
                 throw new ArgumentException("Es necesita una clau per dur a terme el xifrat");
             string textXifrat = null;
             char[] caracteres;
+            if(objs==null)
+            	objs=new object[1];
             switch (xifrat)
             {
                 case XifratText.TextDisimulat:
@@ -76,10 +78,10 @@ namespace Gabriel.Cat.Seguretat
                     textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres, objs[0]);
                     break;
                 case XifratText.TextDisimulatCaracters:
-                    caracteres = new char[255];
-                    for (int i = 0; i < 255; i++)
+                    caracteres = new char[MAXCHAR];
+                    for (int i = 0; i < MAXCHAR; i++)
                         caracteres[i] = (char)(i);
-                    textXifrat = ITextDisimulatXifra(text, nivell, password, objs[0]);
+                    textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres,objs[0]);
                     break;
                 case XifratText.Cesar:
                     if (objs != null)
@@ -310,7 +312,7 @@ namespace Gabriel.Cat.Seguretat
                     passwordActual = passwords.DameElementoActual(escogerKey, numCanvis);
                     xifratTextActual = xifratText.DameElementoActual(escogerKey, numCanvis);
                     xifratPasswordActual = xifratPassword.DameElementoActual(escogerKey, numCanvis);
-                    txtXifrat += metodo(subString.ToString(), xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey) + caracterCanvi;
+                    txtXifrat += metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey) + caracterCanvi;
                     subString = "";
                     numCanvis++;
                 }
@@ -325,7 +327,7 @@ namespace Gabriel.Cat.Seguretat
                 xifratTextActual = xifratText.DameElementoActual(escogerKey, numCanvis);
                 xifratPasswordActual = xifratPassword.DameElementoActual(escogerKey, numCanvis);
 
-                txtXifrat += metodo(subString.ToString(), xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey);
+                txtXifrat += metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey);
             }
             return txtXifrat;
         }
