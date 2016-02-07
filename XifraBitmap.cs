@@ -40,21 +40,41 @@ namespace Gabriel.Cat.Seguretat
 	public static class XifraBitmap
 	{
 		const int BITSBYTE = 8;
-
-		public static Bitmap Xifra(this string text, XifratImg xifrat, NivellXifrat nivell)
+        /// <summary>
+        /// Sirve para saber los bytes que necesita una imagen tener para contener los datos
+        /// </summary>
+        /// <param name="dades"></param>
+        /// <param name="nivell"></param>
+        /// <returns></returns>
+        public static int BytesImgMin(this byte[] dades,NivellXifrat nivell)
+        {
+            return (dades.Length * BITSBYTE) * ((int)nivell + 1); 
+        }
+        /// <summary>
+        /// sirve para saber cuantos bytes puede contener una imagen
+        /// </summary>
+        /// <param name="bmp"></param>
+        /// <param name="nivell"></param>
+        /// <returns></returns>
+        public static int MaxBytesImg(this Bitmap bmp, NivellXifrat nivell)
+        {
+            return bmp.LengthBytes() / (((int)nivell + 1) * BITSBYTE);
+        }
+        public static Bitmap Xifra(this string text, XifratImg xifrat, NivellXifrat nivell)
 		{
 			return Serializar.GetBytes(text).Xifra(xifrat, nivell);
 		}
 		public static Bitmap Xifra(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
 		{
             //hago una img con pixeles random
-			int totalBytesImg = (dades.Length* BITSBYTE) * ((int)nivell + 1) ;
+            int totalBytesImg = dades.BytesImgMin(nivell);
 			int height =Convert.ToInt32( Math.Sqrt(totalBytesImg)), width = (totalBytesImg / height)+1;
 			Bitmap imgRandom = new Bitmap(width, height);
 			imgRandom.RandomPixels();
 			imgRandom.Xifra(xifrat, nivell, dades);
 			return imgRandom;
 		}
+
 		public static void Xifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, string text)
 		{
 			img.Xifra(xifrat, nivell, Serializar.GetBytes(text));
@@ -145,10 +165,6 @@ namespace Gabriel.Cat.Seguretat
 			return dades;
 		}
 
-		public static int MaxBytesXifrat(this Bitmap bmp, NivellXifrat nivell)
-		{
-			return bmp.LengthBytes() / (((int)nivell + 1) * BITSBYTE);
-		}
 
 
 

@@ -34,6 +34,7 @@ namespace Gabriel.Cat.Seguretat
     {
         delegate char MetodoCesar(char caracterePassword,char caracterTexto);
         delegate string MetodoMultiKey(string text, XifratText xifratText, NivellXifrat nivell, string password,XifratPassword xifratPassword, params dynamic[] objs);
+
         const int MAXCHAR = 255, MINCHAR = 0;
 
 
@@ -84,7 +85,7 @@ namespace Gabriel.Cat.Seguretat
                     textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres,objs[0]);
                     break;
                 case XifratText.Cesar:
-                    if (objs.Length!=1)
+                    if (objs.Length==2)
                         textXifrat = CesarXifrar(text, password, nivell, objs[1], objs[0]);
                     else {
                         textXifrat = CesarXifrar(text, password, nivell);
@@ -121,7 +122,7 @@ namespace Gabriel.Cat.Seguretat
                     textoDescifrado = ITextDisimulatDesxifra(text, nivell, password);
                     break;
                 case XifratText.Cesar:
-                    if (objs != null)
+                    if (objs != null&&objs.Length==2)
                         textoDescifrado = CesarDesxifrar(text, password, nivell, objs[1], objs[0]);
                     else {
                         textoDescifrado = CesarDesxifrar(text, password, nivell);
@@ -200,7 +201,7 @@ namespace Gabriel.Cat.Seguretat
             {
                 caracterActualPassword = caracteresPassword.DameElementoActual(ordre, i);
                 caracterTexto = texto[i];
-                textoCifrado += metodo(caracterActualPassword, caracterTexto);
+                textoCifrado &= metodo(caracterActualPassword, caracterTexto);
             }
             return textoCifrado;
         }
@@ -208,36 +209,19 @@ namespace Gabriel.Cat.Seguretat
         #region TextDisimulat
         private static string ITextDisimulatXifra(string text, NivellXifrat nivell, string password, char[] caracteresUsados, char[] caracteresNoUsados = null)//lo malo es que esos caracteres no usados como bulto hacen cantar a las que sin cifrar...
         {
+            if (caracteresUsados == null)
+                throw new ArgumentNullException("Se necesitan unos caracteres para usarlos como basura");
             //no se por que pero pierde los accentos...
             //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
             const int MOD = 71;
-            const int MAXCHAR = 255;
-
-            StringBuilder textXifrat = new StringBuilder();
+            text textXifrat ="";
             int posicionPassword = 0;
-            string aux = "";
+            SortedList<char, char> diccionarioCaracteresNoUsados = ValidarCaracteresNoPermitidos(caracteresNoUsados);
+            SortedList<char, char> diccionarioCaracteresUsados = caracteresUsados.ToSortedList();
+            foreach (KeyValuePair<char, char> keyValue in diccionarioCaracteresNoUsados)
+                diccionarioCaracteresUsados.Remove(keyValue.Key);
+            caracteresUsados = diccionarioCaracteresUsados.ValuesToArray();
 
-            if (caracteresNoUsados != null)
-            {
-                for (int i = 0; i < caracteresNoUsados.Length; i++)
-                {
-                    if (!aux.Contains(caracteresNoUsados[i]))
-                        aux += caracteresNoUsados[i];
-                }
-                if (aux.Length < MAXCHAR)
-                {
-                    while (aux.Contains(caracteresUsados[0]))
-                        caracteresUsados[0] = (char)((1 + caracteresUsados[0]) % MAXCHAR);
-                    for (int i = 1; i < caracteresUsados.Length; i++)
-                    {
-                        if (aux.Contains(caracteresUsados[i]))
-                            caracteresUsados[i] = caracteresUsados[i - 1];
-                    }
-                }
-                else {
-                    throw new ArgumentException("Se han excluido todos los caracteres posibles...");
-                }
-            }
             if (text != "" && password != "")
             {
                 text += caracteresUsados[MiRandom.Next(caracteresUsados.Length)];//lo pongo porque sino queda a la vista
@@ -245,22 +229,22 @@ namespace Gabriel.Cat.Seguretat
                 for (int i = 0; i < text.Length; i++)
                 {
                     for (int j = 0, finalBasura = ((int)password[posicionPassword]) % MOD * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
-                        textXifrat.Append(caracteresUsados[MiRandom.Next(caracteresUsados.Length)]);
-                    textXifrat.Append(text[i]);//pongo el caracter a disimular
+                        textXifrat &= caracteresUsados[MiRandom.Next(caracteresUsados.Length)];
+                    textXifrat &= text[i];//pongo el caracter a disimular
                     posicionPassword++;
                     if (posicionPassword == password.Length)
                         posicionPassword = 0;
                 }
             }
             else
-                return text;
-            return textXifrat.ToString();
+                textXifrat= text;
+            return textXifrat;
         }
         private static string ITextDisimulatDesxifra(string text, NivellXifrat nivell, string password)
         {
             //usa la password caracter a caracter para saber la posicion donde va el texto real...lo demas es pura basura
             const int MOD = 71;
-            StringBuilder textDesxifrat = new StringBuilder();
+            text textDesxifrat = "";
             int posicionPassword = 0;
 
             if (text != "" && password != "")
@@ -270,8 +254,8 @@ namespace Gabriel.Cat.Seguretat
                 while (posicion < text.Length)
                 {
                     if (posicion < text.Length)
-                        textDesxifrat.Append(text[posicion]);
-                    posicion += (((int)password[posicionPassword]) % MOD * (int)nivell + 1) + 1;//me salto la basura
+                        textDesxifrat &= text[posicion];
+                    posicion &= (((int)password[posicionPassword]) % MOD * (int)nivell + 1) + 1;//me salto la basura
                     posicionPassword++;
                     if (posicionPassword == password.Length)
                         posicionPassword = 0;
@@ -281,8 +265,8 @@ namespace Gabriel.Cat.Seguretat
                     textDesxifrat.Remove(textDesxifrat.Length - 1, 1);//quito el caracter centinela
             }
             else
-                return text;
-            return textDesxifrat.ToString();
+                textDesxifrat= text;
+            return textDesxifrat;
         }
         #endregion
         #endregion
@@ -315,12 +299,12 @@ namespace Gabriel.Cat.Seguretat
                     passwordActual = passwords.DameElementoActual(escogerKey, numCanvis);
                     xifratTextActual = xifratText.DameElementoActual(escogerKey, numCanvis);
                     xifratPasswordActual = xifratPassword.DameElementoActual(escogerKey, numCanvis);
-                    txtXifrat += metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey) + caracterCanvi;
+                    txtXifrat &= metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey) + caracterCanvi;
                     subString = "";
                     numCanvis++;
                 }
                 else {
-                    subString += textSenseXifrar[i];
+                    subString &= textSenseXifrar[i];
                 }
 
             }
@@ -330,7 +314,7 @@ namespace Gabriel.Cat.Seguretat
                 xifratTextActual = xifratText.DameElementoActual(escogerKey, numCanvis);
                 xifratPasswordActual = xifratPassword.DameElementoActual(escogerKey, numCanvis);
 
-                txtXifrat += metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey);
+                txtXifrat &= metodo(subString, xifratTextActual, nivell, passwordActual, xifratPasswordActual, caracterArray, escogerKey);
             }
             return txtXifrat;
         }
