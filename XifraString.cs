@@ -224,7 +224,6 @@ namespace Gabriel.Cat.Seguretat
 
             if (text != "" && password != "")
             {
-                text += caracteresUsados[MiRandom.Next(caracteresUsados.Length)];//lo pongo porque sino queda a la vista
 
                 for (int i = 0; i < text.Length; i++)
                 {
@@ -235,6 +234,10 @@ namespace Gabriel.Cat.Seguretat
                     if (posicionPassword == password.Length)
                         posicionPassword = 0;
                 }
+                //asi el ultimo caracter no esta al descubierto :)
+                for (int j = 0, finalBasura = ((int)password[posicionPassword]) % MOD * (int)nivell + 1; j < finalBasura; j++)//pongo los caracteres basura
+                    textXifrat &= caracteresUsados[MiRandom.Next(caracteresUsados.Length)];
+                textXifrat &= caracteresUsados[MiRandom.Next(caracteresUsados.Length)];//pongo el caracter a disimular
             }
             else
                 textXifrat= text;
