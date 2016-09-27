@@ -191,7 +191,8 @@ namespace Gabriel.Cat.Seguretat
 			}
 			public Key GetKey(Stream strObj)
 			{
-				return new Key((GetObject(strObj) as IEnumerable<object>).Casting<ItemKey>());
+				Object objs=GetObject(strObj);
+				return new Key((objs as IEnumerable<object>).Casting<ItemKey>());
 			}
 			public Key GetKey(byte[] bytesObj)
 			{
@@ -199,6 +200,7 @@ namespace Gabriel.Cat.Seguretat
 			}
 
 		}
+
 		public static readonly KeyBinary KeyBin = new Key.KeyBinary();
 		List<ItemEncryptationData> itemsEncryptData;
 		List<ItemEncryptationPassword> itemsEncryptPassword;
@@ -238,18 +240,18 @@ namespace Gabriel.Cat.Seguretat
 		{
             Stream strDecrypted;
             Key key;
-            try
-            {
-                if (keyToDecrypt != null)
-                {
-                    strDecrypted = new MemoryStream(keyToDecrypt.Decrypt(strOneKey.GetAllBytes()));
-                    strDecrypted.Position = strOneKey.Position;
-                }
-                else strDecrypted = strOneKey;
-                key = KeyBin.GetKey(strDecrypted);
-                itemsKey = key.itemsKey;
-                strOneKey.Position = strDecrypted.Position;
-            }catch { throw new Exception("La llave para descifrar los datos de la llave a cargar no es la correcta!"); }
+			try {
+				if (keyToDecrypt != null) {
+					strDecrypted = new MemoryStream(keyToDecrypt.Decrypt(strOneKey.GetAllBytes()));
+					strDecrypted.Position = strOneKey.Position;
+				} else
+					strDecrypted = strOneKey;
+				key = KeyBin.GetKey(strDecrypted);
+				itemsKey = key.itemsKey;
+				strOneKey.Position = strDecrypted.Position;
+			} catch (Exception m) {
+				throw new Exception("La llave para descifrar los datos de la llave a cargar no es la correcta!",m);
+			}
 		}
 		public Key(byte[] bytesKey, Key keyToDecrypt = null)
 			: this(new MemoryStream(bytesKey),keyToDecrypt)
