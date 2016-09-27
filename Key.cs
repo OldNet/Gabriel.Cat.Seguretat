@@ -31,7 +31,7 @@ namespace Gabriel.Cat.Seguretat
             {
                 MethodData = Convert.ToInt32(nodeItem.ChildNodes[0].InnerText);
                 MethodPassword = Convert.ToInt32(nodeItem.ChildNodes[1].InnerText);
-                Password = nodeItem.ChildNodes[2].InnerText.DescaparCaracteresXML();
+                Password = Serializar.ToString(nodeItem.ChildNodes[2].InnerText.HexStringToByteArray());
             }
 
             public void GenerateRandomKey(int lenght=15)
@@ -41,6 +41,7 @@ namespace Gabriel.Cat.Seguretat
                 StringBuilder str = new StringBuilder();
                 for (int i = 0; i < lenght; i++)
                     str.Append((char)MiRandom.Next(256));
+
                 Password = str.ToString();
             }
             public XmlNode ToXmlNode()
@@ -50,15 +51,16 @@ namespace Gabriel.Cat.Seguretat
                 nodeString.Append("<ItemKey>");
                 nodeString.Append("<MethodData>");
                 nodeString.Append(MethodData);
-                nodeString.Append("</ MethodData >");
+                nodeString.Append("</MethodData>");
                 nodeString.Append("<MethodPassword>");
                 nodeString.Append(MethodPassword);
-                nodeString.Append("</ MethodPassword >");
+                nodeString.Append("</MethodPassword>");
                 nodeString.Append("<Password>");
-                nodeString.Append(Password.EscaparCaracteresXML());
+                nodeString.Append(Serializar.GetBytes(Password).ToHex());
                 nodeString.Append("</Password>");
                 nodeString.Append("</ItemKey>");
                 node.LoadXml(nodeString.ToString());
+                node.Normalize();
                 return node.FirstChild;
             }
 
@@ -73,6 +75,7 @@ namespace Gabriel.Cat.Seguretat
                     strKey.Append(item.ToXmlNode().OuterXml);
                 strKey.Append("</Key>");
                 xmlKey.LoadXml(strKey.ToString());
+                xmlKey.Normalize();
                 return xmlKey;
             }
             public static ItemKey[] ToItemKeyArray(XmlDocument xmlKey)
@@ -108,12 +111,12 @@ namespace Gabriel.Cat.Seguretat
         }
         public class ItemEncryptationPassword
         {
-            public delegate string MethodEncryptNonReversible(string data);
+            public delegate string MethodEncryptNonReversible(string password);
             public MethodEncryptNonReversible MethodPassword { get; set; }
 
-            public ItemEncryptationPassword(MethodEncryptNonReversible methodData)
+            public ItemEncryptationPassword(MethodEncryptNonReversible methodPassword)
             {
-                MethodPassword = methodData;
+                MethodPassword = methodPassword;
 
             }
             public string Encrypt(string key)
@@ -150,7 +153,7 @@ namespace Gabriel.Cat.Seguretat
         {
             get
             {
-                return ItemsEncryptPassword;
+                return itemsEncryptPassword;
             }
         }
         public byte[] Encrypt(byte[] data)
@@ -169,7 +172,7 @@ namespace Gabriel.Cat.Seguretat
         }
         public string Decrypt(string data)
         {
-            for (int i = 0, f = itemsKey.Count; i < f; i++)
+            for (int i = itemsKey.Count-1; i >=0; i--)
                 data = itemsEncryptData[itemsKey[i].MethodData].Decrypt(data, itemsEncryptPassword[itemsKey[i].MethodPassword].Encrypt(itemsKey[i].Password));
             return data;
         }
