@@ -220,18 +220,39 @@ namespace Gabriel.Cat.Seguretat
 		{
 			itemsKey.AddRange(ItemKey.ToItemKeyArray(xmlKey));
 		}
-		public Key(FileInfo fileKey)
-			: this(fileKey.GetStream())
+        public Key(string fileKey,params string[] keysToDecrypt ) : this(fileKey,GetKey(keysToDecrypt))
+        {
+
+        }
+        public Key(FileInfo fileKey,params string[] keysToDecrypt):this(fileKey, GetKey(keysToDecrypt))
+        {
+        }
+        public Key(string fileKey, Key keyToDecrypt = null):this(new FileInfo(fileKey),keyToDecrypt)
+        { }
+        public Key(FileInfo fileKey,Key keyToDecrypt=null)
+			: this(fileKey.GetStream(),keyToDecrypt)
 		{
 		}
-		public Key(Stream strKey)
+		public Key(Stream strOneKey, Key keyToDecrypt = null)
 			: this()
 		{
-			Key key = KeyBin.GetKey(strKey);
-			itemsKey = key.itemsKey;
+            Stream strDecrypted;
+            Key key;
+            try
+            {
+                if (keyToDecrypt != null)
+                {
+                    strDecrypted = new MemoryStream(keyToDecrypt.Decrypt(strOneKey.GetAllBytes()));
+                    strDecrypted.Position = strOneKey.Position;
+                }
+                else strDecrypted = strOneKey;
+                key = KeyBin.GetKey(strDecrypted);
+                itemsKey = key.itemsKey;
+                strOneKey.Position = strDecrypted.Position;
+            }catch { throw new Exception("La llave para descifrar los datos de la llave a cargar no es la correcta!"); }
 		}
-		public Key(byte[] bytesKey)
-			: this(new MemoryStream(bytesKey))
+		public Key(byte[] bytesKey, Key keyToDecrypt = null)
+			: this(new MemoryStream(bytesKey),keyToDecrypt)
 		{
 		}
 		public List<ItemKey> ItemsKey {
@@ -292,10 +313,54 @@ namespace Gabriel.Cat.Seguretat
 			return ItemKey.ToXml(itemsKey);
 		}
 
-
-		public  byte[] GetBytes()
+        public byte[] GetBytes(params string[] keysToEncryptData)
+        {
+            return GetBytes(GetKey(keysToEncryptData));
+        }
+		public  byte[] GetBytes(Key keyToEncryptData=null)
 		{
-			return KeyBin.GetBytes(this);
+			byte[] bytes= KeyBin.GetBytes(this);
+            if (keyToEncryptData != null)
+                bytes = keyToEncryptData.Encrypt(bytes);
+            return bytes;
 		}
-	}
+
+        public static Key GetKey(params string[] passwords)
+        {
+            return GetKey((IEnumerable<string>)passwords);
+        }
+        public static Key GetKey(IEnumerable<string> passwords)
+        {
+            if (passwords == null)
+                throw new ArgumentNullException();
+            Key key = new Key();
+            key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoCesar));
+            key.ItemsEncryptPassword.Add(new ItemEncryptationPassword(MetodoHash));
+            foreach(string password in passwords)
+            {
+                if (String.IsNullOrEmpty(password))
+                    throw new ArgumentException("se necesita una password, no puede ser ni null ni empty");
+                key.ItemsKey.Add(new ItemKey() { Password = password });
+            }
+            return key;
+        }
+
+        private static string MetodoCesar(string data, string password, bool encrypt)
+        {
+            string dataOut;
+            if(encrypt)
+            {
+                dataOut = data.Xifra(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+            }else
+            {
+                dataOut = data.Desxifra(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+            }
+            return dataOut;
+        }
+
+        private static string MetodoHash(string password)
+        {
+            return Serializar.GetBytes(password).Hash();
+        }
+    }
 }
