@@ -39,7 +39,7 @@ namespace Gabriel.Cat.Seguretat
 						Password = (string)parts[2]
 					};
 				}
-				public ItemKey GetItemKey(Stream strBytes)
+				public ItemKey GetItemKey(MemoryStream strBytes)
 				{
 					return GetObject(strBytes) as ItemKey;
 				}
@@ -67,7 +67,7 @@ namespace Gabriel.Cat.Seguretat
 				MethodPassword = Convert.ToInt32(nodeItem.ChildNodes[1].InnerText);
 				Password = Serializar.ToString(nodeItem.ChildNodes[2].InnerText.HexStringToByteArray());
 			}
-			public ItemKey(Stream strItems)
+			public ItemKey(MemoryStream strItems)
 			{
 				ItemKey item = ItemKeyBin.GetItemKey(strItems);
 				MethodData = item.MethodData;
@@ -189,7 +189,7 @@ namespace Gabriel.Cat.Seguretat
 					throw new ArgumentException();
 				return base.GetBytes(key.itemsKey);
 			}
-			public Key GetKey(Stream strObj)
+			public Key GetKey(MemoryStream strObj)
 			{
 				Object objs=GetObject(strObj);
 				return new Key((objs as IEnumerable<object>).Casting<ItemKey>());
@@ -232,13 +232,13 @@ namespace Gabriel.Cat.Seguretat
         public Key(string fileKey, Key keyToDecrypt = null):this(new FileInfo(fileKey),keyToDecrypt)
         { }
         public Key(FileInfo fileKey,Key keyToDecrypt=null)
-			: this(fileKey.GetStream(),keyToDecrypt)
+			: this(new MemoryStream(fileKey.GetStream().GetAllBytes()),keyToDecrypt)
 		{
 		}
-		public Key(Stream strOneKey, Key keyToDecrypt = null)
+		public Key(MemoryStream strOneKey, Key keyToDecrypt = null)
 			: this()
 		{
-            Stream strDecrypted;
+            MemoryStream strDecrypted;
             Key key;
 			try {
 				if (keyToDecrypt != null) {
@@ -293,7 +293,7 @@ namespace Gabriel.Cat.Seguretat
 			byte[] bytesDecrypted;
 			try {
 				bytesDecrypted = hexDecrypted.HexStringToByteArray();
-			} catch {
+			} catch (Exception ex){
 				throw new Exception("los datos no se pueden descifrar con esta llave");
 			}
 			return bytesDecrypted;
