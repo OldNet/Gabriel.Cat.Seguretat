@@ -60,26 +60,26 @@ namespace Gabriel.Cat.Seguretat
         {
             return bmp.LengthBytes() / (((int)nivell + 1) * BITSBYTE);
         }
-        public static Bitmap Xifra(this string text, XifratImg xifrat, NivellXifrat nivell)
+        public static Bitmap Encrypt(this string text, XifratImg xifrat, NivellXifrat nivell)
 		{
-			return Serializar.GetBytes(text).Xifra(xifrat, nivell);
+			return Serializar.GetBytes(text).Encrypt(xifrat, nivell);
 		}
-		public static Bitmap Xifra(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
+		public static Bitmap Encrypt(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
 		{
             //hago una img con pixeles random
             int totalBytesImg = dades.BytesImgMin(nivell);
 			int height =Convert.ToInt32( Math.Sqrt(totalBytesImg)), width = (totalBytesImg / height)+1;
 			Bitmap imgRandom = new Bitmap(width, height);
 			imgRandom.RandomPixels();
-			imgRandom.Xifra(xifrat, nivell, dades);
+			imgRandom.Encrypt(xifrat, nivell, dades);
 			return imgRandom;
 		}
 
-		public static void Xifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, string text)
+		public static void Encrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, string text)
 		{
-			img.Xifra(xifrat, nivell, Serializar.GetBytes(text));
+			img.Encrypt(xifrat, nivell, Serializar.GetBytes(text));
 		}
-		public static void Xifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, byte[] dades)
+		public static void Encrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, byte[] dades)
 		{
 			bool[] bitsAPoner;
 			int longitudImg;
@@ -129,7 +129,7 @@ namespace Gabriel.Cat.Seguretat
 
 		}
 
-		public static byte[] Desxifra(this Bitmap img, XifratImg xifrat, NivellXifrat nivell)
+		public static byte[] Decrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell)
 		{
 		 	
 			bool[] dadesBits = null;

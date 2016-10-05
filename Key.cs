@@ -352,10 +352,10 @@ namespace Gabriel.Cat.Seguretat
             string dataOut;
             if(encrypt)
             {
-                dataOut = data.Xifra(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+                dataOut = data.Encrypt(XifratText.Cesar, NivellXifrat.MoltAlt, password);
             }else
             {
-                dataOut = data.Desxifra(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+                dataOut = data.Decrypt(XifratText.Cesar, NivellXifrat.MoltAlt, password);
             }
             return dataOut;
         }

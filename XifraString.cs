@@ -38,29 +38,34 @@ namespace Gabriel.Cat.Seguretat
         const int MAXCHAR = 255, MINCHAR = 0;
 
 
-
+        #region EncryptHash
+        public static string EncryptHash(this string password)
+        {
+            return Serializar.GetBytes(password).Hash();
+        }
+        #endregion
         #region OneKey
-        public static string Xifra(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword)
+        public static string Encrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword)
         {
             if (String.IsNullOrEmpty(password))
                 throw new ArgumentException("Es necesita una clau per dur a terme el xifrat");
-            return Xifra(text, xifratText, nivell, password,xifratPassword, null);
+            return Encrypt(text, xifratText, nivell, password,xifratPassword, null);
         }
-        private static string Xifra(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
+        private static string Encrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
         {
             switch (xifratPassword)
             {
                 case XifratPassword.MD5:
-                    password = Serializar.GetBytes(password).Hash();
+                    password = password.EncryptHash();
                     break;
             }
-            return Xifra(text, xifratText, nivell, password, objs);
+            return Encrypt(text, xifratText, nivell, password, objs);
         }
-        public static string Xifra(this string text, XifratText xifrat, NivellXifrat nivell, string password)
+        public static string Encrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password)
         {
-            return Xifra(text, xifrat, nivell, password, null);
+            return Encrypt(text, xifrat, nivell, password, null);
         }
-        private static string Xifra(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
+        private static string Encrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
         {
             if (String.IsNullOrEmpty(password))
                 throw new ArgumentException("Es necesita una clau per dur a terme el xifrat");
@@ -94,11 +99,11 @@ namespace Gabriel.Cat.Seguretat
             }
             return textXifrat;
         }
-        public static string Desxifra(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword)
+        public static string Decrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword)
         {
-            return Desxifra(text, xifratText, nivell, password, xifratPassword, null);
+            return Decrypt(text, xifratText, nivell, password, xifratPassword, null);
         }
-        private static string Desxifra(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
+        private static string Decrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
         {
             switch (xifratPassword)
             {
@@ -106,13 +111,13 @@ namespace Gabriel.Cat.Seguretat
                     password = Serializar.GetBytes(password).Hash();
                     break;
             }
-            return Desxifra(text, xifratText, nivell, password,objs);
+            return Decrypt(text, xifratText, nivell, password,objs);
         }
-        public static string Desxifra(this string text, XifratText xifrat, NivellXifrat nivell, string password)
+        public static string Decrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password)
         {
-            return Desxifra(text, xifrat, nivell, password, null);
+            return Decrypt(text, xifrat, nivell, password, null);
         }
-        private static string Desxifra(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
+        private static string Decrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
         {
             string textoDescifrado = null;
             switch (xifrat)
@@ -322,38 +327,38 @@ namespace Gabriel.Cat.Seguretat
             return txtXifrat;
         }
 
-        public static string Xifra(this string textSenseXifrar, string[] passwords, XifratText xifratText = XifratText.TextDisimulatCaracters, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Encrypt(this string textSenseXifrar, string[] passwords, XifratText xifratText = XifratText.TextDisimulatCaracters, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Xifra(textSenseXifrar, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
+            return Encrypt(textSenseXifrar, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Xifra(this string textSenseXifrar, XifratText[] xifratText, string[] passwords, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Encrypt(this string textSenseXifrar, XifratText[] xifratText, string[] passwords, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Xifra(textSenseXifrar, xifratText, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
+            return Encrypt(textSenseXifrar, xifratText, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Xifra(this string textSenseXifrar, string[] passwords, XifratPassword[] xifratPassword, XifratText xifratText = XifratText.TextDisimulatCaracters, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Encrypt(this string textSenseXifrar, string[] passwords, XifratPassword[] xifratPassword, XifratText xifratText = XifratText.TextDisimulatCaracters, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Xifra(textSenseXifrar, new XifratText[] { xifratText }, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
+            return Encrypt(textSenseXifrar, new XifratText[] { xifratText }, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Xifra(this string textSenseXifrar, XifratText[] xifratText, XifratPassword[] xifratPassword, string[] passwords, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Encrypt(this string textSenseXifrar, XifratText[] xifratText, XifratPassword[] xifratPassword, string[] passwords, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return XifraDesxifraMultikey(Xifra, textSenseXifrar, xifratText, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
+            return XifraDesxifraMultikey(Encrypt, textSenseXifrar, xifratText, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
         }
         //desxifro
-        public static string Desxifra(this string textXifrat, string[] passwords, XifratText xifratText = XifratText.TextDisimulatCaracters, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Decrypt(this string textXifrat, string[] passwords, XifratText xifratText = XifratText.TextDisimulatCaracters, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Desxifra(textXifrat, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
+            return Decrypt(textXifrat, new XifratText[] { xifratText }, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, XifratText[] xifratText, string[] passwords, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Decrypt(this string textXifrat, XifratText[] xifratText, string[] passwords, XifratPassword xifratPassword = XifratPassword.MD5, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Desxifra(textXifrat, xifratText, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
+            return Decrypt(textXifrat, xifratText, new XifratPassword[] { xifratPassword }, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, string[] passwords, XifratPassword[] xifratPassword, XifratText xifratText = XifratText.TextDisimulatCaracters, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Decrypt(this string textXifrat, string[] passwords, XifratPassword[] xifratPassword, XifratText xifratText = XifratText.TextDisimulatCaracters, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return Desxifra(textXifrat, new XifratText[] { xifratText }, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
+            return Decrypt(textXifrat, new XifratText[] { xifratText }, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
         }
-        public static string Desxifra(this string textXifrat, XifratText[] xifratText, XifratPassword[] xifratPassword, string[] passwords, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
+        public static string Decrypt(this string textXifrat, XifratText[] xifratText, XifratPassword[] xifratPassword, string[] passwords, NivellXifrat nivell = NivellXifrat.MoltAlt, Ordre escogerKey = Ordre.Consecutiu, char caracterCanvi = '\n')
         {
-            return XifraDesxifraMultikey(Desxifra, textXifrat, xifratText, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
+            return XifraDesxifraMultikey(Decrypt, textXifrat, xifratText, xifratPassword, passwords, nivell, escogerKey, caracterCanvi);
 
         }
 
