@@ -6,50 +6,58 @@ using System.Threading.Tasks;
 using System.Xml;
 using Gabriel.Cat.Extension;
 using System.IO;
+using Gabriel.Cat.Binaris;
 
 namespace Gabriel.Cat.Seguretat
 {
 	public class Key
 	{
-		public class ItemKey
+        public class ItemKeyBinary : ElementoBinario
+        {
+            static Formato itemKeyFormat;
+            static ItemKeyBinary()
+            {
+                //inicializo la parte del formato aqui
+                itemKeyFormat = new Formato();
+                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
+                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
+                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.String));
+            }
+
+            public override byte[] GetBytes(object obj)
+            {
+                return GetBytes(obj as ItemKey);
+            }
+
+            public ItemKey GetItemKey(byte[] bytes)
+            {
+                return GetItemKey(new MemoryStream(bytes));
+            }
+
+            public override object GetObject(MemoryStream bytes)
+            {
+                return GetItemKey(bytes);
+            }
+            public static byte[] GetBytes(ItemKey itemKey)
+            {
+                if (itemKey == null) throw new ArgumentNullException();
+                return itemKeyFormat.GetBytes(new object[] { itemKey.MethodData, itemKey.MethodPassword, itemKey.Password });
+            }
+
+
+            public static ItemKey GetItemKey(MemoryStream strBytes)
+            {
+                if (strBytes == null || !strBytes.CanRead) throw new ArgumentException();
+                object[] parts = itemKeyFormat.GetPartsOfObject(strBytes);
+                return new ItemKey() { MethodData = (int)parts[0], MethodPassword = (int)parts[1], Password = (string)parts[2] };
+            }
+
+        }
+        public class ItemKey
 		{
-			public class ItemKeyBinary : Gabriel.Cat.Binaris.ElementoComplejoBinario
-			{
-				public ItemKeyBinary()
-				{
-					//inicializo la parte del formato aqui
+			
 
-					base.PartesElemento.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
-					base.PartesElemento.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
-					base.PartesElemento.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.String));
-				}
-				public override byte[] GetBytes(object obj)
-				{
-					ItemKey item = obj as ItemKey;
-					byte[] bytes = new byte[0];
-					return bytes.AddArray(base.PartesElemento[0].GetBytes(item.MethodData), base.PartesElemento[1].GetBytes(item.MethodPassword), base.PartesElemento[2].GetBytes(item.Password));
-				}
-            
-
-				protected override object GetObject(object[] parts)
-				{
-					return new ItemKey() {
-						MethodData = (int)parts[0],
-						MethodPassword = (int)parts[1],
-						Password = (string)parts[2]
-					};
-				}
-				public ItemKey GetItemKey(MemoryStream strBytes)
-				{
-					return GetObject(strBytes) as ItemKey;
-				}
-				public ItemKey GetItemKey(byte[] bytes)
-				{
-					return GetItemKey(new MemoryStream(bytes));
-				}
-			}
-			public static readonly ItemKeyBinary ItemKeyBin = new ItemKeyBinary();
-			public int MethodData { get; set; }
+            public int MethodData { get; set; }
 			public int MethodPassword { get; set; }
 			public string Password { get; set; }
 			public ItemKey(int methodData = 0, int methodPassword = 0, bool randomKey = true, int lenghtRandomKey = 15)
@@ -69,7 +77,7 @@ namespace Gabriel.Cat.Seguretat
 			}
 			public ItemKey(MemoryStream strItems)
 			{
-				ItemKey item = ItemKeyBin.GetItemKey(strItems);
+				ItemKey item = ItemKeyBinary.GetItemKey(strItems);
 				MethodData = item.MethodData;
 				MethodPassword = item.MethodPassword;
 				Password = item.Password;
@@ -88,7 +96,9 @@ namespace Gabriel.Cat.Seguretat
 
 				Password = str.ToString();
 			}
-			public XmlNode ToXmlNode()
+
+            #region XmlSerialitzacion
+            public XmlNode ToXmlNode()
 			{
 				XmlDocument node = new XmlDocument();
 				node.LoadXml(IToXmlNode().ToString());
@@ -134,10 +144,10 @@ namespace Gabriel.Cat.Seguretat
 					itemsKey[i] = new ItemKey(xmlKey.FirstChild.ChildNodes[i]);
 				return itemsKey;
 			}
+            #endregion
 
-               
-		}
-		public class ItemEncryptationData
+        }
+        public class ItemEncryptationData
 		{
 			public delegate string MethodEncryptReversible(string data, string password, bool encrypt = true);
             
@@ -173,39 +183,45 @@ namespace Gabriel.Cat.Seguretat
 				return MethodPassword(key);
 			}
 		}
-
-		public class KeyBinary : Binaris.ElementoIEnumerableBinario
+		public class KeyBinary : ElementoBinario
 		{
-			public KeyBinary()
-				: base(ItemKey.ItemKeyBin, LongitudBinaria.Long)
+            static Formato keyFormat;
+			static KeyBinary()	
 			{
-
+                keyFormat = new Formato();
+                keyFormat.ElementosArchivo.Afegir(new ElementoIEnumerableBinario(new ItemKeyBinary() , ElementoIEnumerableBinario.LongitudBinaria.Long));
 			}
-			public override byte[] GetBytes(object obj)
+			public static byte[] GetBytes(Key key)
 			{
-				Key key = obj as Key;
-
-				if (key == null)
-					throw new ArgumentException();
-				return base.GetBytes(key.itemsKey);
+                if (key == null) throw new ArgumentNullException();
+                return keyFormat.GetBytes(key.ItemsKey);
 			}
-			public Key GetKey(MemoryStream strObj)
+			public static Key GetKey(MemoryStream strObj)
 			{
-				Object objs=GetObject(strObj);
-				return new Key((objs as IEnumerable<object>).Casting<ItemKey>());
+                if (strObj == null || !strObj.CanRead) throw new ArgumentException();
+				Object[] parts=keyFormat.GetPartsOfObject(strObj);
+				return new Key(parts.Casting<ItemKey>());
 			}
-			public Key GetKey(byte[] bytesObj)
+			public static Key GetKey(byte[] bytesObj)
 			{
 				return GetKey(new MemoryStream(bytesObj));
 			}
 
-		}
+            public override byte[] GetBytes(object obj)
+            {
+                return GetBytes(obj as Key);
+            }
 
-		public static readonly KeyBinary KeyBin = new Key.KeyBinary();
+            public override object GetObject(MemoryStream bytes)
+            {
+                return GetKey(bytes);
+            }
+        }
+
 		List<ItemEncryptationData> itemsEncryptData;
 		List<ItemEncryptationPassword> itemsEncryptPassword;
 		List<ItemKey> itemsKey;
-
+        static Encoding Encoder = System.Text.ASCIIEncoding.UTF8;
 		public Key()
 		{
 			itemsKey = new List<ItemKey>();
@@ -246,7 +262,7 @@ namespace Gabriel.Cat.Seguretat
 					strDecrypted.Position = strOneKey.Position;
 				} else
 					strDecrypted = strOneKey;
-				key = KeyBin.GetKey(strDecrypted);
+                key = KeyBinary.GetKey(strDecrypted);
 				itemsKey = key.itemsKey;
 				strOneKey.Position = strDecrypted.Position;
 			} catch (Exception m) {
@@ -273,9 +289,8 @@ namespace Gabriel.Cat.Seguretat
 		}
 		public byte[] Encrypt(byte[] data)
 		{
-			Hex dataHex = data.ToHex();
-			return Serializar.GetBytes(Encrypt(dataHex));
-		}
+			return Encoder.GetBytes(Encrypt(Encoder.GetString(data)));
+        }
 		public string Encrypt(string data)
 		{
 			ItemEncryptationData itemEncryptData;
@@ -289,15 +304,8 @@ namespace Gabriel.Cat.Seguretat
 		}
 		public byte[] Decrypt(byte[] data)
 		{
-			string hexDecrypted = Decrypt(Serializar.ToString(data));
-			byte[] bytesDecrypted;
-			try {
-				bytesDecrypted = hexDecrypted.HexStringToByteArray();
-			} catch (Exception ex){
-				throw new Exception("los datos no se pueden descifrar con esta llave");
-			}
-			return bytesDecrypted;
-		}
+            return Encoder.GetBytes(Decrypt(Encoder.GetString(data)));
+        }
 		public string Decrypt(string data)
 		{
 			ItemEncryptationData itemEncryptData;
@@ -321,7 +329,7 @@ namespace Gabriel.Cat.Seguretat
         }
 		public  byte[] GetBytes(Key keyToEncryptData=null)
 		{
-			byte[] bytes= KeyBin.GetBytes(this);
+			byte[] bytes= KeyBinary.GetBytes(this);
             if (keyToEncryptData != null)
                 bytes = keyToEncryptData.Encrypt(bytes);
             return bytes;
@@ -362,7 +370,7 @@ namespace Gabriel.Cat.Seguretat
 
         private static string MetodoHash(string password)
         {
-            return Serializar.GetBytes(password).Hash();
+            return password.EncryptHash();
         }
     }
 }
