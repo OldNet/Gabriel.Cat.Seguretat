@@ -35,9 +35,6 @@ namespace Gabriel.Cat.Seguretat
         delegate char MetodoCesar(char caracterePassword,char caracterTexto);
         delegate string MetodoMultiKey(string text, XifratText xifratText, NivellXifrat nivell, string password,XifratPassword xifratPassword, params dynamic[] objs);
 
-        const int MAXCHAR = 255, MINCHAR = 0;
-
-
         #region EncryptHash
         public static string EncryptHash(this string password)
         {
@@ -84,8 +81,8 @@ namespace Gabriel.Cat.Seguretat
                     textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres, objs[0]);
                     break;
                 case XifratText.TextDisimulatCaracters:
-                    caracteres = new char[MAXCHAR];
-                    for (int i = 0; i < MAXCHAR; i++)
+                    caracteres = new char[char.MaxValue];
+                    for (int i = 0; i < char.MaxValue; i++)
                         caracteres[i] = (char)(i);
                     textXifrat = ITextDisimulatXifra(text, nivell, password, caracteres,objs[0]);
                     break;
@@ -140,19 +137,20 @@ namespace Gabriel.Cat.Seguretat
         private static string CesarXifrar(string texto, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
             const int FIX = 3;
-            SortedList<char, char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
-            int charAuxInt;
+            SortedList<char, char> diccionario = GetValidadorCaracteresNoPermitidos(caracteresNoPermitidos);
+            
             
             MetodoCesar metodoPonerCaracterValidoCifrar = (caracterActualPassword, caracterTexto) =>
             {
-            	charAuxInt=caracterTexto+(((int)(nivell)+ FIX )* caracterActualPassword);
-            	if(charAuxInt>MAXCHAR)
-            		charAuxInt-=MAXCHAR;
+                int charAuxInt;
+                charAuxInt =caracterTexto+(((int)(nivell)+ FIX )* caracterActualPassword);
+            	if(charAuxInt>char.MaxValue)
+            		charAuxInt-=char.MaxValue;
             	caracterTexto = (char)charAuxInt;
                 while (diccionario.ContainsKey(caracterTexto))
                 {
-                    if (caracterTexto == MAXCHAR)
-                        caracterTexto = (char)MINCHAR;
+                    if (caracterTexto == char.MaxValue)
+                        caracterTexto = char.MinValue;
                     else 
                         caracterTexto++;                   
                 }
@@ -163,18 +161,19 @@ namespace Gabriel.Cat.Seguretat
         private static string CesarDesxifrar(string textXifrat, string password, NivellXifrat nivell, Ordre ordre = Ordre.Consecutiu, char[] caracteresNoPermitidos = null)
         {
             const int FIX = 3;
-            SortedList<char,char> diccionario = ValidarCaracteresNoPermitidos(caracteresNoPermitidos);
-            int charAuxInt;
+            SortedList<char,char> diccionario = GetValidadorCaracteresNoPermitidos(caracteresNoPermitidos);
+          //:S ahora no se como hacerlo porque char acepta valores int... y si supera no se como sacar el 255
             MetodoCesar metodoPonerCaracterValidoDescifrar = (caracterActualPassword, caracterTexto) =>
             {
+                int charAuxInt;
             	charAuxInt=caracterTexto-(((int)(nivell) + FIX) * caracterActualPassword);
-            	if(charAuxInt<MINCHAR)
-            		charAuxInt+=MAXCHAR;//al ser negativo se restara
+            	if(charAuxInt<char.MinValue)
+            		charAuxInt+=char.MaxValue;//al ser negativo se restara
                 caracterTexto = (char)charAuxInt;
                 while (diccionario.ContainsKey(caracterTexto))
                 {
-                    if (caracterTexto == MINCHAR)
-                        caracterTexto = (char)MAXCHAR;
+                    if (caracterTexto == char.MinValue)
+                        caracterTexto = char.MaxValue;
                     else
                         caracterTexto--;
                 }
@@ -183,13 +182,13 @@ namespace Gabriel.Cat.Seguretat
             return MetodoCesarComun(metodoPonerCaracterValidoDescifrar, textXifrat, password, nivell, ordre);
         }
 
-        private static SortedList<char,char> ValidarCaracteresNoPermitidos(char[] caracteresNoPermitidos)
+        private static SortedList<char,char> GetValidadorCaracteresNoPermitidos(char[] caracteresNoPermitidos)
         {
             if (caracteresNoPermitidos == null)
                 caracteresNoPermitidos = new char[0];
-            else if (caracteresNoPermitidos.Length == MAXCHAR)
+            else if (caracteresNoPermitidos.Length == char.MaxValue)
             {
-                if (caracteresNoPermitidos.Distinct().ToArray().Length == MAXCHAR)
+                if (caracteresNoPermitidos.Distinct().ToArray().Length == char.MaxValue)
                     throw new ArgumentException("Se han descartado todos los caracteres validos...");
             }
 
@@ -201,14 +200,14 @@ namespace Gabriel.Cat.Seguretat
 
             char caracterTexto, caracterActualPassword;
             char[] caracteresPassword = password.ToCharArray();
-            text textoCifrado = "";
+            StringBuilder str = new StringBuilder();
             for (int i = 0; i < texto.Length; i++)
             {
                 caracterActualPassword = caracteresPassword.DameElementoActual(ordre, i);
                 caracterTexto = texto[i];
-                textoCifrado &= metodo(caracterActualPassword, caracterTexto);
+                str.Append(metodo(caracterActualPassword, caracterTexto));
             }
-            return textoCifrado;
+            return str.ToString();
         }
         #endregion
         #region TextDisimulat
@@ -221,7 +220,7 @@ namespace Gabriel.Cat.Seguretat
             const int MOD = 71;
             text textXifrat ="";
             int posicionPassword = 0;
-            SortedList<char, char> diccionarioCaracteresNoUsados = ValidarCaracteresNoPermitidos(caracteresNoUsados);
+            SortedList<char, char> diccionarioCaracteresNoUsados = GetValidadorCaracteresNoPermitidos(caracteresNoUsados);
             SortedList<char, char> diccionarioCaracteresUsados = caracteresUsados.ToSortedList();
             foreach (KeyValuePair<char, char> keyValue in diccionarioCaracteresNoUsados)
                 diccionarioCaracteresUsados.Remove(keyValue.Key);
