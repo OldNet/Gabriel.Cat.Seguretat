@@ -194,12 +194,12 @@ namespace Gabriel.Cat.Seguretat
 			public static byte[] GetBytes(Key key)
 			{
                 if (key == null) throw new ArgumentNullException();
-                return keyFormat.GetBytes(key.ItemsKey);
+                return keyFormat.GetBytes(new Object[]{key.ItemsKey});
 			}
 			public static Key GetKey(MemoryStream strObj)
 			{
                 if (strObj == null || !strObj.CanRead) throw new ArgumentException();
-				Object[] parts=keyFormat.GetPartsOfObject(strObj);
+                Object[] parts=keyFormat.GetPartsOfObject(strObj)[0] as Object[];
 				return new Key(parts.Casting<ItemKey>());
 			}
 			public static Key GetKey(byte[] bytesObj)
@@ -221,7 +221,7 @@ namespace Gabriel.Cat.Seguretat
 		List<ItemEncryptationData> itemsEncryptData;
 		List<ItemEncryptationPassword> itemsEncryptPassword;
 		List<ItemKey> itemsKey;
-        static Encoding Encoder = System.Text.ASCIIEncoding.UTF8;
+        static Encoding Encoder = Encoding.UTF32;
 		public Key()
 		{
 			itemsKey = new List<ItemKey>();
@@ -289,7 +289,8 @@ namespace Gabriel.Cat.Seguretat
 		}
 		public byte[] Encrypt(byte[] data)
 		{
-			return Encoder.GetBytes(Encrypt(Encoder.GetString(data)));
+			byte[] dataEncrypted= Encoder.GetBytes(Encrypt(Encoder.GetString(data)));
+			return dataEncrypted;
         }
 		public string Encrypt(string data)
 		{
@@ -304,7 +305,8 @@ namespace Gabriel.Cat.Seguretat
 		}
 		public byte[] Decrypt(byte[] data)
 		{
-            return Encoder.GetBytes(Decrypt(Encoder.GetString(data)));
+			byte[] dataDecrypted= Encoder.GetBytes(Decrypt(Encoder.GetString(data)));
+			return dataDecrypted;
         }
 		public string Decrypt(string data)
 		{
