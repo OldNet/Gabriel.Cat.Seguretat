@@ -51,7 +51,7 @@ namespace Gabriel.Cat.Seguretat
                 throw new ArgumentException("Es necesita una clau per dur a terme el xifrat");
             return Encrypt(text, xifratText, nivell, password,xifratPassword, null);
         }
-        private static string Encrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
+        internal static string Encrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
         {
             switch (xifratPassword)
             {
@@ -65,7 +65,7 @@ namespace Gabriel.Cat.Seguretat
         {
             return Encrypt(text, xifrat, nivell, password, null);
         }
-        private static string Encrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
+        internal static string Encrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
         {
             if (String.IsNullOrEmpty(password))
                 throw new ArgumentException("Es necesita una clau per dur a terme el xifrat");
@@ -103,7 +103,7 @@ namespace Gabriel.Cat.Seguretat
         {
             return Decrypt(text, xifratText, nivell, password, xifratPassword, null);
         }
-        private static string Decrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
+        internal static string Decrypt(this string text, XifratText xifratText, NivellXifrat nivell, string password, XifratPassword xifratPassword, params dynamic[] objs)
         {
             switch (xifratPassword)
             {
@@ -117,7 +117,7 @@ namespace Gabriel.Cat.Seguretat
         {
             return Decrypt(text, xifrat, nivell, password, null);
         }
-        private static string Decrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
+        internal static string Decrypt(this string text, XifratText xifrat, NivellXifrat nivell, string password, params dynamic[] objs)
         {
             string textoDescifrado = null;
             switch (xifrat)
