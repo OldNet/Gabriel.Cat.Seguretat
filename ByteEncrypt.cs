@@ -147,20 +147,27 @@ namespace Gabriel.Cat.Extension
         
         }
         private static byte[] DecryptDisimulat(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
-        {//no funciona bien...
+        {
             byte[] bytesTrobats;
             long longitudArray = bytes.Length;
+            long longitud=0;
+            int j = 0;
             //calculo la longitud original
-             //no hago bien el calculo
-            for (int i = 0; i < bytes.Length; i++)
-                longitudArray -= CalucloNumeroCirfrado(password, level, order, i);
-            bytesTrobats = new byte[longitudArray];
+            while(longitudArray>0)
+            {
+                longitudArray -= CalucloNumeroCirfrado(password, level, order, j++);
+                //quito el caracter
+                longitudArray--;
+                //lo cuento
+                longitud++;
+            }
+            bytesTrobats = new byte[longitud];
             unsafe
             {
                 bytesTrobats.UnsafeMethod((unsBytesTrobats) => {
                     bytes.UnsafeMethod((unsBytes) => {
 
-                        for (int i = 0; i < unsBytes.Length; i++)
+                        for (int i = 0; i < bytesTrobats.Length; i++)
                         {
                             //recorro la array de bytes y pongo los bytes nuevos que tocan
                             unsBytes.PtrArray+= CalucloNumeroCirfrado(password, level, order, i);//me salto los bytes random
@@ -181,61 +188,41 @@ namespace Gabriel.Cat.Extension
             int sumaCesar;
             unsafe
             {
-                bytesEncryptats.UnsafeMethod((unsByteEncriptat) => {
-
-                    bytes.UnsafeMethod((unsBytes) => {
-
-                        for(int i=0;i<unsBytes.Length;i++)
-                        {
-                            sumaCesar = CalucloNumeroCirfrado(password, level, order, i);
-                            *unsByteEncriptat.PtrArray =(byte)((*unsBytes.PtrArray + sumaCesar) % byte.MaxValue);
-                            unsByteEncriptat.PtrArray++;
-                            unsBytes.PtrArray++;
-                        }
-
-
-                    });
-
-
-                });
+                bytesEncryptats.UnsafeMethod((unsByteEncriptat) => bytes.UnsafeMethod(unsBytes => {
+					for (int i = 0; i < unsBytes.Length; i++) {
+						sumaCesar = CalucloNumeroCirfrado(password, level, order, i);
+						*unsByteEncriptat.PtrArray = (byte)((*unsBytes.PtrArray + sumaCesar) % byte.MaxValue);
+						unsByteEncriptat.PtrArray++;
+						unsBytes.PtrArray++;
+					}
+				}));
             }
             return bytesEncryptats;
         }
         private static byte[] DecryptCesar(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
         {//no funciona bien...
-            byte[] bytesEncryptats = new byte[bytes.Length];
+            byte[] bytesDesencryptats = new byte[bytes.Length];
             int restaCesar;
             int preByte;
             unsafe
             {
-                bytesEncryptats.UnsafeMethod((unsByteEncriptat) => {
-
-                    bytes.UnsafeMethod((unsBytes) => {
-
-                        for (int i = 0; i < unsBytes.Length; i++)
-                        {
-                            restaCesar = CalucloNumeroCirfrado(password, level, order, i);
-                            preByte = (*unsBytes.PtrArray - restaCesar);
-                            if (preByte < 0){
-                            	preByte*=-1;
-                            	preByte%=byte.MaxValue;
-                            	preByte*=-1;
-                     
-                            	preByte += byte.MaxValue;
-                            }
-                         
-                            * unsByteEncriptat.PtrArray = (byte)preByte;
-                            unsByteEncriptat.PtrArray++;
-                            unsBytes.PtrArray++;
-                        }
-
-
-                    });
-
-
-                });
+                bytesDesencryptats.UnsafeMethod((unsByteDesencryptat) => bytes.UnsafeMethod(unsBytes => {
+					for (int i = 0; i < unsBytes.Length; i++) {
+						restaCesar = CalucloNumeroCirfrado(password, level, order, i);
+						preByte = (*unsBytes.PtrArray - restaCesar);
+						//lo tengo que restar y tirar atras para volver al estado
+						if (preByte < 0) {
+							preByte = Math.Abs(preByte);
+							preByte = preByte % byte.MaxValue;
+							preByte = byte.MaxValue-preByte;
+						}
+						*unsByteDesencryptat.PtrArray = (byte)preByte;
+						unsByteDesencryptat.PtrArray++;
+						unsBytes.PtrArray++;
+					}
+				}));
             }
-            return bytesEncryptats;
+            return bytesDesencryptats;
         }
         #endregion
         #endregion
