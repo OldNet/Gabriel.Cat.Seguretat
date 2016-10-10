@@ -10,12 +10,12 @@ namespace Gabriel.Cat.Extension
     {
         public const char CharChangeDefault = '\n';
         #region CanNotDecrypt
-        public static string EncryptNotReverse(this string password, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash)
+        public static string EncryptNotReverse(this string password, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5)
         {
             switch (passwordEncrypt)
             {
-                case PasswordEncrypt.Hash: password = Serializar.GetBytes(password).Hash(); break;
-                case PasswordEncrypt.Sha3: password = Serializar.GetBytes(password).SHA3(); break;
+                case PasswordEncrypt.Md5: password = Serializar.GetBytes(password).Hash(); break;
+                case PasswordEncrypt.Sha256: password = Serializar.GetBytes(password).SHA3(); break;
             }
             return password;
         }
@@ -29,7 +29,7 @@ namespace Gabriel.Cat.Extension
         }
         public static string Encrypt(this string text, byte[] password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
-            return Encrypt(text, password, dataEncrypt, level, passwordEncrypt,order);
+            return Encrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level,order);
         }
         #endregion
         internal static string Encrypt(this string text, byte[] password, DataEncrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
@@ -46,7 +46,7 @@ namespace Gabriel.Cat.Extension
         public static string Decrypt(this string text, byte[] password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
             if (password == null) password = new byte[0];
-            return Decrypt(text, password, dataEncrypt, level, passwordEncrypt,order);
+            return Decrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level,order);
         }
         #endregion
         internal static string Decrypt(this string text, byte[] password, DataEncrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
@@ -58,11 +58,11 @@ namespace Gabriel.Cat.Extension
         #region MultiKey
         #region Escollir clau per caracter
         #region SobreCargaEncrypt
-        public static string Encrypt(this string text, string[] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Encrypt(this string text, string[] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Encrypt(text, passwords, new DataEncrypt[] { dataEncrypt }, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
-        public static string Encrypt(this string text, string[] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Encrypt(this string text, string[] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Encrypt(text, passwords, dataEncrypt, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
@@ -79,11 +79,11 @@ namespace Gabriel.Cat.Extension
             return Encrypt(text, passwordBytes.ToArray(), dataEncrypt, passwordEncrypt, level, escogerKey, charChange);
         }
 
-        public static string Encrypt(this string text, byte[][] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Encrypt(this string text, byte[][] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Encrypt(text, passwords, new DataEncrypt[] { dataEncrypt }, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
-        public static string Encrypt(this string text, byte[][] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Encrypt(this string text, byte[][] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Encrypt(text, passwords, dataEncrypt, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
@@ -98,11 +98,11 @@ namespace Gabriel.Cat.Extension
             return Serializar.ToString(Serializar.GetBytes(text).Encrypt(passwords,Serializar.GetBytes(charChange), dataEncrypt,passwordEncrypt, level, escogerKey));
         }
         #region SobreCargaDecrypt
-        public static string Decrypt(this string text, string[] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Decrypt(this string text, string[] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Decrypt(text, passwords, new DataEncrypt[] { dataEncrypt }, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
-        public static string Decrypt(this string text, string[] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Decrypt(this string text, string[] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Encrypt(text, passwords, dataEncrypt, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
@@ -118,11 +118,11 @@ namespace Gabriel.Cat.Extension
                 passwordBytes.Add(Serializar.GetBytes(passwords[i]));
             return Decrypt(text, passwordBytes.ToArray(), dataEncrypt, passwordEncrypt, level, escogerKey, charChange);
         }
-        public static string Decrypt(this string text, byte[][] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Decrypt(this string text, byte[][] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Decrypt(text, passwords, new DataEncrypt[] { dataEncrypt }, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
-        public static string Decrypt(this string text, byte[][] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Hash, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
+        public static string Decrypt(this string text, byte[][] passwords, DataEncrypt[] dataEncrypt, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu, char charChange = CharChangeDefault)
         {
             return Decrypt(text, passwords, dataEncrypt, new PasswordEncrypt[] { passwordEncrypt }, level, escogerKey, charChange);
         }
