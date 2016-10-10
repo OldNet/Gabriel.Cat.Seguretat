@@ -22,7 +22,7 @@ namespace Gabriel.Cat.Extension
         /// <param name="password"></param>
         /// <param name="nivel"></param>
         /// <returns></returns>
-        public static IEnumerable<T> Oculta<T>(this IEnumerable<T> lista, ObjetoRandom<T> metodoObjetoRandom, T marcaFin, Point inicioMatriz, string password, NivellXifrat nivel)
+        public static IEnumerable<T> Oculta<T>(this IEnumerable<T> lista, ObjetoRandom<T> metodoObjetoRandom, T marcaFin, Point inicioMatriz, string password, LevelEncrypt nivel)
         {
             if (metodoObjetoRandom == null || marcaFin.Equals(default(T)) || String.IsNullOrEmpty(password)||lista.Contains(marcaFin)||lista.Contains(default(T)))
                 throw new ArgumentException("Hay argumentos no validos!");
@@ -57,7 +57,7 @@ namespace Gabriel.Cat.Extension
                         matriz[x, y] = metodoObjetoRandom();
             return matriz.OfType<T>();
         }
-        public static IEnumerable<T> Desoculta<T>(this IEnumerable<T> lista, ObjetoRandom<T> metodoObjetoRandom, T marcaFin, Point inicioMatriz, string password, NivellXifrat nivel)
+        public static IEnumerable<T> Desoculta<T>(this IEnumerable<T> lista, ObjetoRandom<T> metodoObjetoRandom, T marcaFin, Point inicioMatriz, string password, LevelEncrypt nivel)
         {
             if (metodoObjetoRandom == null || marcaFin.Equals(default(T)) || String.IsNullOrEmpty(password) || lista.Contains(marcaFin) || lista.Contains(default(T)))
                 throw new ArgumentException("Hay argumentos no validos!");

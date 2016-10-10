@@ -16,9 +16,9 @@ namespace Gabriel.Cat.Seguretat
 	public struct XifratImgNivell
 	{
 		XifratImg xifrat;
-		NivellXifrat nivell;
+        LevelEncrypt nivell;
 
-		public XifratImgNivell(XifratImg xifrat, NivellXifrat nivell)
+		public XifratImgNivell(XifratImg xifrat, LevelEncrypt nivell)
 		{
 			this.xifrat = xifrat;
 			this.nivell = nivell;
@@ -31,7 +31,7 @@ namespace Gabriel.Cat.Seguretat
 
 		}
 
-		public NivellXifrat Nivell {
+		public LevelEncrypt Nivell {
 			get {
 				return nivell;
 			}
@@ -46,7 +46,7 @@ namespace Gabriel.Cat.Seguretat
         /// <param name="dades"></param>
         /// <param name="nivell"></param>
         /// <returns></returns>
-        public static int BytesImgMin(this byte[] dades,NivellXifrat nivell)
+        public static int BytesImgMin(this byte[] dades, LevelEncrypt nivell)
         {
             return (dades.Length * BITSBYTE) * ((int)nivell + 1); 
         }
@@ -56,15 +56,15 @@ namespace Gabriel.Cat.Seguretat
         /// <param name="bmp"></param>
         /// <param name="nivell"></param>
         /// <returns></returns>
-        public static int MaxBytesImg(this Bitmap bmp, NivellXifrat nivell)
+        public static int MaxBytesImg(this Bitmap bmp, LevelEncrypt nivell)
         {
             return bmp.LengthBytes() / (((int)nivell + 1) * BITSBYTE);
         }
-        public static Bitmap Encrypt(this string text, XifratImg xifrat, NivellXifrat nivell)
+        public static Bitmap Encrypt(this string text, XifratImg xifrat, LevelEncrypt nivell)
 		{
 			return Serializar.GetBytes(text).Encrypt(xifrat, nivell);
 		}
-		public static Bitmap Encrypt(this byte[] dades, XifratImg xifrat, NivellXifrat nivell)
+		public static Bitmap Encrypt(this byte[] dades, XifratImg xifrat, LevelEncrypt nivell)
 		{
             //hago una img con pixeles random
             int totalBytesImg = dades.BytesImgMin(nivell);
@@ -75,11 +75,11 @@ namespace Gabriel.Cat.Seguretat
 			return imgRandom;
 		}
 
-		public static void Encrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, string text)
+		public static void Encrypt(this Bitmap img, XifratImg xifrat, LevelEncrypt nivell, string text)
 		{
 			img.Encrypt(xifrat, nivell, Serializar.GetBytes(text));
 		}
-		public static void Encrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell, byte[] dades)
+		public static void Encrypt(this Bitmap img, XifratImg xifrat, LevelEncrypt nivell, byte[] dades)
 		{
 			bool[] bitsAPoner;
 			int longitudImg;
@@ -129,7 +129,7 @@ namespace Gabriel.Cat.Seguretat
 
 		}
 
-		public static byte[] Decrypt(this Bitmap img, XifratImg xifrat, NivellXifrat nivell)
+		public static byte[] Decrypt(this Bitmap img, XifratImg xifrat, LevelEncrypt nivell)
 		{
 		 	
 			bool[] dadesBits = null;

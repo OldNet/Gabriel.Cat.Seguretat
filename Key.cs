@@ -149,7 +149,7 @@ namespace Gabriel.Cat.Seguretat
         }
         public class ItemEncryptationData
 		{
-			public delegate string MethodEncryptReversible(string data, string password, bool encrypt = true);
+			public delegate byte[] MethodEncryptReversible(byte[] data, string password, bool encrypt = true);
             
 
 			public MethodEncryptReversible MethodData { get; set; }
@@ -159,11 +159,11 @@ namespace Gabriel.Cat.Seguretat
 				MethodData = methodData;
 
 			}
-			public string Encrypt(string data, string key)
+			public byte[] Encrypt(byte[] data, string key)
 			{
 				return MethodData(data, key);
 			}
-			public string Decrypt(string data, string key)
+			public byte[] Decrypt(byte[] data, string key)
 			{
 				return MethodData(data, key, false);
 			}
@@ -289,37 +289,37 @@ namespace Gabriel.Cat.Seguretat
 		}
 		public byte[] Encrypt(byte[] data)
 		{
-			byte[] dataEncrypted= Encoder.GetBytes(Encrypt(Encoder.GetString(data)));
-			return dataEncrypted;
+            ItemEncryptationData itemEncryptData;
+            ItemEncryptationPassword itemEncryptPassword;
+            for (int i = 0, f = itemsKey.Count; i < f; i++)
+            {
+                itemEncryptData = itemsEncryptData[itemsKey[i].MethodData];
+                itemEncryptPassword = itemsEncryptPassword[itemsKey[i].MethodPassword];
+                data = itemEncryptData.Encrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
+            }
+            return data;
         }
 		public string Encrypt(string data)
 		{
-			ItemEncryptationData itemEncryptData;
-			ItemEncryptationPassword itemEncryptPassword;
-			for (int i = 0, f = itemsKey.Count; i < f; i++){
-				itemEncryptData=itemsEncryptData[itemsKey[i].MethodData];
-				itemEncryptPassword=itemsEncryptPassword[itemsKey[i].MethodPassword];
-				data = itemEncryptData.Encrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
-			}
-			return data;
+            return Serializar.ToString(Encrypt(Serializar.GetBytes(data)));
 		}
 		public byte[] Decrypt(byte[] data)
 		{
-			byte[] dataDecrypted= Encoder.GetBytes(Decrypt(Encoder.GetString(data)));
-			return dataDecrypted;
+            ItemEncryptationData itemEncryptData;
+            ItemEncryptationPassword itemEncryptPassword;
+            for (int i = itemsKey.Count - 1; i >= 0; i--)
+            {
+
+                itemEncryptData = itemsEncryptData[itemsKey[i].MethodData];
+                itemEncryptPassword = itemsEncryptPassword[itemsKey[i].MethodPassword];
+                data = itemEncryptData.Decrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
+            }
+            return data;
         }
 		public string Decrypt(string data)
 		{
-			ItemEncryptationData itemEncryptData;
-			ItemEncryptationPassword itemEncryptPassword;
-			for (int i = itemsKey.Count - 1; i >= 0; i--){ 
-				
-				itemEncryptData=itemsEncryptData[itemsKey[i].MethodData];
-				itemEncryptPassword=itemsEncryptPassword[itemsKey[i].MethodPassword];
-				data = itemEncryptData.Decrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
-			}
-			return data;
-		}
+            return Serializar.ToString(Decrypt(Serializar.GetBytes(data)));
+        }
 		public XmlDocument ToXml()
 		{
 			return ItemKey.ToXml(itemsKey);
@@ -357,22 +357,22 @@ namespace Gabriel.Cat.Seguretat
             return key;
         }
 
-        private static string MetodoCesar(string data, string password, bool encrypt)
+        private static byte[] MetodoCesar(byte[] data, string password, bool encrypt)
         {
-            string dataOut;
+            byte[] dataOut;
             if(encrypt)
             {
-                dataOut = data.Encrypt(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+                dataOut = data.Encrypt(password,DataEncrypt.Cesar, LevelEncrypt.Highest);
             }else
             {
-                dataOut = data.Decrypt(XifratText.Cesar, NivellXifrat.MoltAlt, password);
+                dataOut = data.Decrypt( password, DataEncrypt.Cesar, LevelEncrypt.Highest );
             }
             return dataOut;
         }
 
         private static string MetodoHash(string password)
         {
-            return password.EncryptHash();
+            return password.EncryptNotReverse();
         }
     }
 }
