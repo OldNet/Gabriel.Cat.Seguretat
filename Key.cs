@@ -221,7 +221,6 @@ namespace Gabriel.Cat.Seguretat
 		List<ItemEncryptationData> itemsEncryptData;
 		List<ItemEncryptationPassword> itemsEncryptPassword;
 		List<ItemKey> itemsKey;
-        static Encoding Encoder = Encoding.UTF32;
 		public Key()
 		{
 			itemsKey = new List<ItemKey>();
