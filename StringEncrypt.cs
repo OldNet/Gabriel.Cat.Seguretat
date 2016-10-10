@@ -24,11 +24,12 @@ namespace Gabriel.Cat.Extension
         #region SobreCargaEncrypt
         public static string Encrypt(this string text, string password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing,Ordre order=Ordre.Consecutiu)
         {
-            if (password == null) password = "";
+        	if(string.IsNullOrEmpty(password))throw new ArgumentException("se requiere una password con longitud minima de un caracter");
             return Encrypt(text, Serializar.GetBytes(password), dataEncrypt, level, passwordEncrypt,order);
         }
         public static string Encrypt(this string text, byte[] password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
+        	if(password==null||password.Length==0)throw new ArgumentException("se requiere una password con longitud minima de un byte");
             return Encrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level,order);
         }
         #endregion
@@ -40,12 +41,13 @@ namespace Gabriel.Cat.Extension
         #region SobreCargaDecrypt
         public static string Decrypt(this string text, string password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
-            if (password == null) password = "";
+            if (string.IsNullOrEmpty(password))
+				throw new ArgumentException("se requiere una password", "password");
             return Decrypt(text, Serializar.GetBytes(password), dataEncrypt, level, passwordEncrypt,order);
         }
         public static string Decrypt(this string text, byte[] password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
-            if (password == null) password = new byte[0];
+            if(password==null||password.Length==0)throw new ArgumentException("se requiere una password con longitud minima de un byte");
             return Decrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level,order);
         }
         #endregion
