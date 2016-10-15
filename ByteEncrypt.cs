@@ -239,7 +239,8 @@ namespace Gabriel.Cat.Extension
 						if (preByte < 0) {
 							preByte = Math.Abs(preByte);
 							preByte = preByte % byte.MaxValue;
-							preByte = byte.MaxValue - preByte;
+							if(preByte>0)
+							  preByte = byte.MaxValue - preByte;
 						}
 						*unsByteDesencryptat.PtrArray = (byte)preByte;
 						unsByteDesencryptat.PtrArray++;
