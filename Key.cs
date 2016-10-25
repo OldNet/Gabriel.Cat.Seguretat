@@ -19,9 +19,9 @@ namespace Gabriel.Cat.Seguretat
             {
                 //inicializo la parte del formato aqui
                 itemKeyFormat = new Formato();
-                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
-                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
-                itemKeyFormat.ElementosArchivo.Afegir(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.String));
+                itemKeyFormat.ElementosArchivo.Add(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
+                itemKeyFormat.ElementosArchivo.Add(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.Int));
+                itemKeyFormat.ElementosArchivo.Add(Binaris.ElementoBinario.ElementosTipoAceptado(Serializar.TiposAceptados.String));
             }
 
             public override byte[] GetBytes(object obj)
@@ -73,7 +73,7 @@ namespace Gabriel.Cat.Seguretat
 			{
 				MethodData = Convert.ToInt32(nodeItem.ChildNodes[0].InnerText);
 				MethodPassword = Convert.ToInt32(nodeItem.ChildNodes[1].InnerText);
-				Password = Serializar.ToString(nodeItem.ChildNodes[2].InnerText.HexStringToByteArray());
+				Password = Serializar.ToString((Hex)nodeItem.ChildNodes[2].InnerText);
 			}
 			public ItemKey(MemoryStream strItems)
 			{
@@ -116,7 +116,7 @@ namespace Gabriel.Cat.Seguretat
 				nodeString.Append(MethodPassword);
 				nodeString.Append("</MethodPassword>");
 				nodeString.Append("<Password>");
-				nodeString.Append(Serializar.GetBytes(Password).ToHex());
+				nodeString.Append((string)(Hex)Serializar.GetBytes(Password));
 				nodeString.Append("</Password>");
 				nodeString.Append("</ItemKey>");
 				return nodeString;
@@ -189,7 +189,7 @@ namespace Gabriel.Cat.Seguretat
 			static KeyBinary()	
 			{
                 keyFormat = new Formato();
-                keyFormat.ElementosArchivo.Afegir(new ElementoIEnumerableBinario(new ItemKeyBinary() , ElementoIEnumerableBinario.LongitudBinaria.Long));
+                keyFormat.ElementosArchivo.Add(new ElementoIEnumerableBinario(new ItemKeyBinary() , ElementoIEnumerableBinario.LongitudBinaria.Long));
 			}
 			public static byte[] GetBytes(Key key)
 			{

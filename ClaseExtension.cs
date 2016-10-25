@@ -24,7 +24,7 @@ namespace Gabriel.Cat.Extension
         /// <returns></returns>
         public static IEnumerable<T> Oculta<T>(this IEnumerable<T> lista, ObjetoRandom<T> metodoObjetoRandom, T marcaFin, Point inicioMatriz, string password, LevelEncrypt nivel)
         {
-            if (metodoObjetoRandom == null || marcaFin.Equals(default(T)) || String.IsNullOrEmpty(password)||lista.Contains(marcaFin)||lista.Contains(default(T)))
+            if (metodoObjetoRandom == null || marcaFin.Equals(default(T)) || String.IsNullOrEmpty(password) || lista.Contains(marcaFin) || lista.Contains(default(T)))
                 throw new ArgumentException("Hay argumentos no validos!");
             const double MULTIPLICADOR = 13 / 11;
             Vector vector = new Vector(0, 0, inicioMatriz.X, inicioMatriz.Y);
@@ -64,22 +64,22 @@ namespace Gabriel.Cat.Extension
             Vector vector = new Vector(0, 0, inicioMatriz.X, inicioMatriz.Y);
             Llista<T> pilaObjs = new Llista<T>();
             T[,] matriz;
-            pilaObjs.Afegir(default(T));
+            pilaObjs.Add(default(T));
             matriz = new T[(Convert.ToInt32(Math.Sqrt(pilaObjs.Count))), (Convert.ToInt32(Math.Sqrt(pilaObjs.Count)))];
             //codigo para perder los datos
-            while (!pilaObjs[pilaObjs.Count-1].Equals(marcaFin))
+            while (!pilaObjs[pilaObjs.Count - 1].Equals(marcaFin))
             {
-                vector = matriz.GetVector((int)password[vector.FinX* vector.FinY], vector.FinX, vector.FinY);
+                vector = matriz.GetVector((int)password[vector.FinX * vector.FinY], vector.FinX, vector.FinY);
                 matriz.Recorrer(vector, (ContinuaTratandoObjeto<T>)((obj) =>
                 {
                     if (!obj.Equals(default(T)))//salto a los diferentes porque son valores puestos :D
-                       pilaObjs.Afegir(obj);
+                        pilaObjs.Add(obj);
                     return new ContinuaTratando<T>() { Objeto = default(T), Continua = !obj.Equals(marcaFin) };
 
                 }));
             }
             pilaObjs.Pop();//quito default centinela
-            pilaObjs.Elimina(pilaObjs.Count - 1);//quito marcafin
+            pilaObjs.RemoveAt(pilaObjs.Count - 1);//quito marcafin
 
             return pilaObjs;
         }
