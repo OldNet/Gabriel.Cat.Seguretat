@@ -16,7 +16,11 @@ namespace Gabriel.Cat.Extension
 		/// <summary>
 		/// It is the Cesar algorithm adapted
 		/// </summary>
-		Cesar
+		Cesar,
+        /// <summary>
+        /// It is a method to disorder bytes using a password
+        /// </summary>
+        Perdut,
 	}
 	public enum PasswordEncrypt
 	{
@@ -97,13 +101,18 @@ namespace Gabriel.Cat.Extension
 				case DataEncrypt.Disimulat:
 					bytesEncrypted = EncryptDisimulat(bytes, password, level, order);
 					break;
+                case DataEncrypt.Perdut:
+                    bytesEncrypted = ComunEncryptDecryptPerdut(bytes, password, level, order, true);
+                    break;
 			    default:throw new ArgumentOutOfRangeException("dataEncrypt");
 			}
 			
 			return bytesEncrypted;
 		}
-		#region SobreCargaDecrypt
-		public static byte[] Decrypt(this byte[] bytes, string password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
+
+       
+        #region SobreCargaDecrypt
+        public static byte[] Decrypt(this byte[] bytes, string password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
 		{
 			if (string.IsNullOrEmpty(password))
 				throw new ArgumentException("se requiere una password", "password");
@@ -135,6 +144,9 @@ namespace Gabriel.Cat.Extension
 				case DataEncrypt.Disimulat:
 					bytesDecrypted = DecryptDisimulat(bytes, password, level, order);
 					break;
+                case DataEncrypt.Perdut:
+                    bytesDecrypted = ComunEncryptDecryptPerdut(bytes, password, level, order, false);
+                    break;
 			    default:throw new ArgumentOutOfRangeException("dataDecrypt");
 			}
 
@@ -142,12 +154,14 @@ namespace Gabriel.Cat.Extension
 		}
 
 
-		private static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int i)
+        private static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, long pos)
 		{
-			return  password.DameElementoActual(order, i) * (int)level;
+			return  password.DameElementoActual(order, pos) * (int)level;
 		}
-		#region disimulat Encrypt
-		private static byte[] EncryptDisimulat(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
+   
+
+        #region disimulat Encrypt
+        private static byte[] EncryptDisimulat(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
 		{
 			byte[] bytesDisimulats;
 			long longitudArray = bytes.Length;
@@ -208,9 +222,9 @@ namespace Gabriel.Cat.Extension
 			return bytesTrobats;
 		}
 		#endregion
-		#region Cesar encrypt
+		#region Cesar encrypt //por testear
 		private static byte[] EncryptCesar(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
-		{//no funciona bien...
+		{
 			byte[] bytesEncryptats = new byte[bytes.Length];
 			int sumaCesar;
 			unsafe {
@@ -226,7 +240,7 @@ namespace Gabriel.Cat.Extension
 			return bytesEncryptats;
 		}
 		private static byte[] DecryptCesar(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
-		{//no funciona bien...
+		{
 			byte[] bytesDesencryptats = new byte[bytes.Length];
 			int restaCesar;
 			int preByte;
@@ -250,13 +264,53 @@ namespace Gabriel.Cat.Extension
 			}
 			return bytesDesencryptats;
 		}
-		#endregion
-		#endregion
-		//testing pendiente
-		#region MultiKey
-		#region Escollir clau per caracter
-		//parte en comun :)
-		private static byte[] EncryptDecryptCommun(MetodoMultiKey metodo, byte[] data, byte[][] passwords, byte[] bytesChange, DataEncrypt[] dataEncrypt, PasswordEncrypt[] passwordsEncrypt, LevelEncrypt level, Ordre order)
+        #endregion
+
+        #region Perdut Encrypt
+
+        private static byte[] ComunEncryptDecryptPerdut(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order, bool toEncrypt)
+        {
+
+            unsafe
+            {
+                bytes.UnsafeMethod((ptrBytes) =>
+                {
+                        for (int i = 0, f = (int)level + 1; i < f; i++)//repito el proceso como nivel de seguridad :D
+                        {
+                            TractaPerdut(ptrBytes, password, level, order, toEncrypt);//si descifra ira hacia atrás
+                        }
+
+                });
+                
+            }
+            return bytes;
+        }
+
+        private static unsafe void TractaPerdut(UnsafeArray ptrBytes, byte[] password, LevelEncrypt level, Ordre order, bool leftToRight)
+        {
+            byte aux;
+            long posAux;
+            int direccion = leftToRight ? 1 : -1;
+            //falta probar
+            for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ;i!=f;i+=direccion)
+            {
+                posAux = (CalucloNumeroCirfrado(password, level, order, i)+i) % ptrBytes.Length;
+                aux = ptrBytes.PtrArray[posAux];
+                ptrBytes.PtrArray[posAux] = ptrBytes.PtrArray[i];
+                ptrBytes.PtrArray[i] = aux;
+            }
+            
+        }
+
+    
+
+        #endregion
+        #endregion
+        //testing pendiente
+        #region MultiKey
+        #region Escollir clau per caracter
+        //parte en comun :)
+        private static byte[] EncryptDecryptCommun(MetodoMultiKey metodo, byte[] data, byte[][] passwords, byte[] bytesChange, DataEncrypt[] dataEncrypt, PasswordEncrypt[] passwordsEncrypt, LevelEncrypt level, Ordre order)
 		{
 			//por testear!!
 			int numCanvis = 0;
@@ -265,7 +319,7 @@ namespace Gabriel.Cat.Extension
 			PasswordEncrypt passwordEncryptAct;
 			byte[] bytesResult = new byte[0];
 			byte[] byteResultAux;
-			byte[][] dataSplited = data.Split(bytesChange);
+            List<byte[]> dataSplited = data.Split(bytesChange);
 			List<byte[]> dataResultSplited = new List<byte[]>();
 			//opero
 			passwordEncryptAct = passwordsEncrypt.DameElementoActual(order, numCanvis);
@@ -276,7 +330,7 @@ namespace Gabriel.Cat.Extension
              byteResultAux = byteResultAux.AddArray(bytesChange);
 			dataResultSplited.Add(byteResultAux);
 			numCanvis++;
-			for (int i = 1; i < dataSplited.Length - 1; i++) {
+			for (int i = 1; i < dataSplited.Count - 1; i++) {
                 
 				passwordEncryptAct = passwordsEncrypt.DameElementoActual(order, numCanvis);
 				dataEncryptAct = dataEncrypt.DameElementoActual(order, numCanvis);
@@ -286,12 +340,12 @@ namespace Gabriel.Cat.Extension
 				numCanvis++;
                 
 			}
-			if (dataSplited.Length > 1) {
-				if (dataSplited[dataSplited.Length - 1].Length != 0) {//si no acaba en la marca es que hay bytes
+			if (dataSplited.Count > 1) {
+				if (dataSplited[dataSplited.Count - 1].Length != 0) {//si no acaba en la marca es que hay bytes
 					passwordEncryptAct = passwordsEncrypt.DameElementoActual(order, numCanvis);
 					dataEncryptAct = dataEncrypt.DameElementoActual(order, numCanvis);
 					passwordActual = passwords.DameElementoActual(order, numCanvis);
-					byteResultAux = metodo(dataSplited[dataSplited.Length - 1], passwordActual, dataEncryptAct, passwordEncryptAct, level, order).AddArray(bytesChange);
+					byteResultAux = metodo(dataSplited[dataSplited.Count - 1], passwordActual, dataEncryptAct, passwordEncryptAct, level, order).AddArray(bytesChange);
 					dataResultSplited.Add(byteResultAux);
       
 				} else
@@ -300,7 +354,7 @@ namespace Gabriel.Cat.Extension
 
 			return bytesResult.AddArray(dataResultSplited.ToArray());
 		}
-
+        //los bytes para el cambio tienen que ser unicos...y no se pueden dar dentro de los datos...
 		#region SobreCargaEncrypt
 		public static byte[] Encrypt(this byte[] bytes, string[] passwords, DataEncrypt dataEncrypt = DataEncrypt.Cesar, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5, LevelEncrypt level = LevelEncrypt.Normal, Ordre escogerKey = Ordre.Consecutiu)
 		{
