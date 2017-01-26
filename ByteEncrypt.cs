@@ -154,7 +154,7 @@ namespace Gabriel.Cat.Extension
 		}
 
 
-        private static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, long pos)
+        private static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
 		{
 			return  password.DameElementoActual(order, pos) * (int)level;
 		}
@@ -294,7 +294,7 @@ namespace Gabriel.Cat.Extension
             //falta probar
             for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ;i!=f;i+=direccion)
             {
-                posAux = (CalucloNumeroCirfrado(password, level, order, i)+i) % ptrBytes.Length;
+                posAux = (CalucloNumeroCirfrado(password, level, order,(int) i)+i) % ptrBytes.Length;
                 aux = ptrBytes.PtrArray[posAux];
                 ptrBytes.PtrArray[posAux] = ptrBytes.PtrArray[i];
                 ptrBytes.PtrArray[i] = aux;
