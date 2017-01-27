@@ -335,23 +335,32 @@ namespace Gabriel.Cat.Seguretat
                 bytes = keyToEncryptData.Encrypt(bytes);
             return bytes;
 		}
+        public static Key GetKey(long numeroDeRandomPasswords)
+        {
+            string[] randomPasswords = new string[numeroDeRandomPasswords];
+            for(long i =0;i<numeroDeRandomPasswords;i++)
+            {
+                randomPasswords[i] = (MiRandom.Next() + "").EncryptNotReverse(PasswordEncrypt.Sha256);
+            }
+            return GetKey(randomPasswords);
 
+        }
         public static Key GetKey(params string[] passwords)
         {
-            return GetKey((IEnumerable<string>)passwords);
+            return GetKey((IList<string>)passwords);
         }
-        public static Key GetKey(IEnumerable<string> passwords)
+        public static Key GetKey(IList<string> passwords)
         {
             if (passwords == null)
                 throw new ArgumentNullException();
             Key key = new Key();
             key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoCesar));
             key.ItemsEncryptPassword.Add(new ItemEncryptationPassword(MetodoHash));
-            foreach(string password in passwords)
+            for(int i=0;i<passwords.Count;i++)
             {
-                if (String.IsNullOrEmpty(password))
+                if (String.IsNullOrEmpty(passwords[i]))
                     throw new ArgumentException("se necesita una password, no puede ser ni null ni empty");
-                key.ItemsKey.Add(new ItemKey() { Password = password });
+                key.ItemsKey.Add(new ItemKey() { Password = passwords[i] });
             }
             return key;
         }
