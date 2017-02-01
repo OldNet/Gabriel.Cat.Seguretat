@@ -154,7 +154,7 @@ namespace Gabriel.Cat.Extension
 		}
 
 
-        private static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
+        internal static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
 		{
 			return  password.DameElementoActual(order, pos) * (int)level;
 		}
@@ -270,6 +270,7 @@ namespace Gabriel.Cat.Extension
 
         private static byte[] ComunEncryptDecryptPerdut(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order, bool toEncrypt)
         {
+            bytes = bytes.SubArray(bytes.Length);
 
             unsafe
             {
@@ -287,7 +288,7 @@ namespace Gabriel.Cat.Extension
         }
 
         private static unsafe void TractaPerdut(UnsafeArray ptrBytes, byte[] password, LevelEncrypt level, Ordre order, bool leftToRight)
-        {
+        {//de momento no va del todo bien...
             byte aux;
             long posAux;
             int direccion = leftToRight ? 1 : -1;

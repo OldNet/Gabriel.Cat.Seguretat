@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace Gabriel.Cat.Extension
 {
+    public enum TextEcrypt
+    {
+        Perdut
+    }
    public static class StringEncrypt
     {
+        
         public const char CharChangeDefault = '\n';
         #region CanNotDecrypt
         public static string EncryptNotReverse(this string password, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Md5)
@@ -35,9 +40,37 @@ namespace Gabriel.Cat.Extension
         #endregion
         internal static string Encrypt(this string text, byte[] password, DataEncrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
         {
-            return Serializar.ToString(Serializar.GetBytes(text).Encrypt(password, dataEncrypt, level,order));
+            string textXifrat;
+            switch (dataEncrypt)
+            {
+                default: textXifrat = Serializar.ToString(Serializar.GetBytes(text).Encrypt(password, dataEncrypt, level, order)); break;
+            }
+            return textXifrat;
         }
-
+        #region SobreCargaEncrypt
+        public static string Encrypt(this string text, string password, TextEcrypt dataEncrypt =TextEcrypt.Perdut, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
+        {
+            if (string.IsNullOrEmpty(password)) throw new ArgumentException("se requiere una password con longitud minima de un caracter");
+            return Encrypt(text, Serializar.GetBytes(password), dataEncrypt, level, passwordEncrypt, order);
+        }
+        public static string Encrypt(this string text, byte[] password, TextEcrypt dataEncrypt = TextEcrypt.Perdut, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
+        {
+            if (password == null || password.Length == 0) throw new ArgumentException("se requiere una password con longitud minima de un byte");
+            return Encrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level, order);
+        }
+        #endregion
+        internal static string Encrypt(this string text, byte[] password, TextEcrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
+        {
+            string textXifrat;
+            switch (dataEncrypt)
+            {
+                  case TextEcrypt.Perdut:
+                       textXifrat = ComunEncryptDecryptPerdut(text, password, level, order, true);
+                       break;
+                default:throw new ArgumentOutOfRangeException();
+            }
+            return textXifrat;
+        }
         #region SobreCargaDecrypt
         public static string Decrypt(this string text, string password, DataEncrypt dataEncrypt = DataEncrypt.Cesar, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
         {
@@ -53,9 +86,75 @@ namespace Gabriel.Cat.Extension
         #endregion
         internal static string Decrypt(this string text, byte[] password, DataEncrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
         {
-            return Serializar.ToString(Serializar.GetBytes(text).Decrypt(password, dataEncrypt, level, order));
+            string textDesxifrat;
+            switch(dataEncrypt)
+            {
+                default:textDesxifrat= Serializar.ToString(Serializar.GetBytes(text).Decrypt(password, dataEncrypt, level, order));break;
+            }
+            return textDesxifrat;
+        }
+        #region SobreCargaDecrypt
+        public static string Decrypt(this string text, string password, TextEcrypt dataEncrypt = TextEcrypt.Perdut, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
+        {
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentException("se requiere una password", "password");
+            return Decrypt(text, Serializar.GetBytes(password), dataEncrypt, level, passwordEncrypt, order);
+        }
+        public static string Decrypt(this string text, byte[] password, TextEcrypt dataEncrypt = TextEcrypt.Perdut, LevelEncrypt level = LevelEncrypt.Normal, PasswordEncrypt passwordEncrypt = PasswordEncrypt.Nothing, Ordre order = Ordre.Consecutiu)
+        {
+            if (password == null || password.Length == 0) throw new ArgumentException("se requiere una password con longitud minima de un byte");
+            return Decrypt(text, password.EncryptNotReverse(passwordEncrypt), dataEncrypt, level, order);
+        }
+        #endregion
+        internal static string Decrypt(this string text, byte[] password, TextEcrypt dataEncrypt, LevelEncrypt level, Ordre order = Ordre.Consecutiu)
+        {
+            string textDesxifrat;
+            switch (dataEncrypt)
+            {
+                 case TextEcrypt.Perdut:textDesxifrat = ComunEncryptDecryptPerdut(text, password, level, order, false);
+                     break;
+                default:throw new ArgumentOutOfRangeException();
+            }
+            return textDesxifrat;
+        }
+        #region CharsPerduts
+        private static string ComunEncryptDecryptPerdut(string chars, byte[] password, LevelEncrypt level, Ordre order, bool toEncrypt)
+        {
+        
+
+            unsafe
+            {
+                char* ptrChars;
+                chars = new string(chars.ToCharArray());
+                fixed (char* ptChars = chars)
+                {
+                    ptrChars = ptChars;
+                    for (int i = 0, f = (int)level + 1; i < f; i++)//repito el proceso como nivel de seguridad :D
+                    {
+                        TractaPerdut(ptrChars, chars.Length, password, level, order, toEncrypt);//si descifra ira hacia atrás
+                    }
+                }
+
+            }
+            return chars;
         }
 
+        private static unsafe void TractaPerdut(char* ptrChars,int lenght, byte[] password, LevelEncrypt level, Ordre order, bool leftToRight)
+        {//de momento no va del todo bien...
+            char aux;
+            long posAux;
+            int direccion = leftToRight ? 1 : -1;
+            //falta probar
+            for (long i = leftToRight ? 0 : lenght - 1, f = leftToRight ? lenght- 1 : 0; i != f; i += direccion)
+            {
+                posAux = (ByteEncrypt.CalucloNumeroCirfrado(password, level, order, (int)i) + i) % lenght;
+                aux = ptrChars[posAux];
+                ptrChars[posAux] = ptrChars[i];
+                ptrChars[i] = aux;
+            }
+
+        }
+        #endregion
         #endregion
         #region MultiKey
         #region Escollir clau per caracter
