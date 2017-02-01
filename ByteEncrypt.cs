@@ -224,7 +224,7 @@ namespace Gabriel.Cat.Extension
 		#endregion
 		#region Cesar encrypt //por testear
 		private static byte[] EncryptCesar(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
-		{
+		{//algo va mal...
 			byte[] bytesEncryptats = new byte[bytes.Length];
 			int sumaCesar;
 			unsafe {
@@ -240,8 +240,8 @@ namespace Gabriel.Cat.Extension
 			return bytesEncryptats;
 		}
 		private static byte[] DecryptCesar(byte[] bytes, byte[] password, LevelEncrypt level, Ordre order)
-		{
-			byte[] bytesDesencryptats = new byte[bytes.Length];
+        {//algo va mal...
+            byte[] bytesDesencryptats = new byte[bytes.Length];
 			int restaCesar;
 			int preByte;
 			unsafe {
@@ -288,17 +288,17 @@ namespace Gabriel.Cat.Extension
         }
 
         private static unsafe void TractaPerdut(UnsafeArray ptrBytes, byte[] password, LevelEncrypt level, Ordre order, bool leftToRight)
-        {//de momento no va del todo bien...
+        {//va bien :D
             byte aux;
             long posAux;
             int direccion = leftToRight ? 1 : -1;
-            //falta probar
+            byte* ptBytes = ptrBytes.PtrArray;//creo que optmizo un poquito al no entrar en la propiedad :D
             for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ; leftToRight? i<=f: i >= f; i+=direccion)
             {
                 posAux = (CalucloNumeroCirfrado(password, level, order,(int) i)+i) % ptrBytes.Length;
-                aux = ptrBytes.PtrArray[posAux];
-                ptrBytes.PtrArray[posAux] = ptrBytes.PtrArray[i];
-                ptrBytes.PtrArray[i] = aux;
+                aux = ptBytes[posAux];
+                ptBytes[posAux] = ptBytes[i];
+                ptBytes[i] = aux;
             }
             
         }

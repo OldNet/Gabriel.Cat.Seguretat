@@ -377,15 +377,29 @@ namespace Gabriel.Cat.Seguretat
             if (passwords == null)
                 throw new ArgumentNullException();
             Key key = new Key();
+            key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoPerdut));
             key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoCesar));
             key.ItemsEncryptPassword.Add(new ItemEncryptationPassword(MetodoHash));
             for (int i = 0; i < passwords.Count; i++)
             {
-                if (String.IsNullOrEmpty(passwords[i]))
-                    throw new ArgumentException("se necesita una password, no puede ser ni null ni empty");
-                key.ItemsKey.Add(new ItemKey() { Password = passwords[i] });
+                if (!String.IsNullOrEmpty(passwords[i]))
+                key.ItemsKey.Add(new ItemKey() { Password = passwords[i], MethodData=i%2==0?0:1 });
             }
             return key;
+        }
+
+        private static byte[] MetodoPerdut(byte[] data, string password, bool encrypt)
+        {
+            byte[] dataOut;
+            if (encrypt)
+            {
+                dataOut = data.Encrypt(password, DataEncrypt.Perdut, LevelEncrypt.Highest);
+            }
+            else
+            {
+                dataOut = data.Decrypt(password, DataEncrypt.Perdut, LevelEncrypt.Highest);
+            }
+            return dataOut;
         }
 
         private static byte[] MetodoCesar(byte[] data, string password, bool encrypt)
