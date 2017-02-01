@@ -293,7 +293,7 @@ namespace Gabriel.Cat.Extension
             long posAux;
             int direccion = leftToRight ? 1 : -1;
             //falta probar
-            for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ;i!=f;i+=direccion)
+            for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ; leftToRight? i<=f: i >= f; i+=direccion)
             {
                 posAux = (CalucloNumeroCirfrado(password, level, order,(int) i)+i) % ptrBytes.Length;
                 aux = ptrBytes.PtrArray[posAux];
