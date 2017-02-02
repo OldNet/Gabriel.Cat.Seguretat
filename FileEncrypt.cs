@@ -44,11 +44,11 @@ namespace Gabriel.Cat.Seguretat
             //encrypto los datos :D
             if(encrypt)
             {
-                ComunEncryptDecrypt(srFileToEncrypt, swFilteOutputEncrypted, password, dataEncrypt, level, order);
+                Encrypt(srFileToEncrypt, swFilteOutputEncrypted, password, dataEncrypt, level,PasswordEncrypt.Nothing, order);
             }
             else
             {
-                Dencrypt(srFileToEncrypt, swFilteOutputEncrypted, password, dataEncrypt, level, order);
+                Dencrypt(srFileToEncrypt, swFilteOutputEncrypted, password, dataEncrypt, level, PasswordEncrypt.Nothing, order);
             }
 
             if (outputInADirefetnFile)
