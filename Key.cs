@@ -374,16 +374,24 @@ namespace Gabriel.Cat.Seguretat
         }
         public static Key GetKey(IList<string> passwords)
         {
+            const int CESAR = 0, PERDUT = 1;
             if (passwords == null)
                 throw new ArgumentNullException();
+            
+               
             Key key = new Key();
-            key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoPerdut));
             key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoCesar));
+            key.ItemsEncryptData.Add(new ItemEncryptationData(MetodoPerdut));
             key.ItemsEncryptPassword.Add(new ItemEncryptationPassword(MetodoHash));
             for (int i = 0; i < passwords.Count; i++)
             {
                 if (!String.IsNullOrEmpty(passwords[i]))
-                key.ItemsKey.Add(new ItemKey() { Password = passwords[i], MethodData=i%2==0?0:1 });
+                key.ItemsKey.Add(new ItemKey() { Password = passwords[i], MethodData=CESAR});
+            }
+            if (passwords.Count != 0)
+            {
+                key.ItemsKey[0].MethodData =PERDUT;
+                key.ItemsKey[key.ItemsKey.Count - 1].MethodData = PERDUT;
             }
             return key;
         }

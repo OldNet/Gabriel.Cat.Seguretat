@@ -38,9 +38,6 @@
     <Reference Include="Gabriel.Cat.Binaris">
       <HintPath>..\Gabriel.Cat.Binaris\bin\Release\Gabriel.Cat.Binaris.dll</HintPath>
     </Reference>
-    <Reference Include="Gabriel.Cat.Utilitats">
-      <HintPath>..\Gabriel.Cat.Utilitats\Gabriel.Cat.Utilitats\bin\Release\Gabriel.Cat.Utilitats.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -57,6 +54,12 @@
     <Compile Include="StringEncrypt.cs" />
     <Compile Include="XifraBitmap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gabriel.Cat.Utilitats\Gabriel.Cat.Utilitats\Gabriel.Cat.Utilitats.csproj">
+      <Project>{6fdf9bb1-ae07-4820-beee-a2f52cfbe770}</Project>
+      <Name>Gabriel.Cat.Utilitats</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
