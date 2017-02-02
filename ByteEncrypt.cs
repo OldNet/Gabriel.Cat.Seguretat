@@ -266,9 +266,6 @@ namespace Gabriel.Cat.Extension
                                 preByte += byte.MaxValue+1;
 
                         }
-                     /*   else if (preByte == byte.MinValue)
-                            preByte = byte.MaxValue;
-               */
                        
                         //tengo lo que le han puesto de mas y tengo que quitarselo teniendo en cuenta que cuando llegue a 0 tiene que seguir 255
 						*ptrBytesCesarDecrypt = (byte)preByte;
@@ -307,6 +304,7 @@ namespace Gabriel.Cat.Extension
             byte aux;
             long posAux;
             int direccion = leftToRight ? 1 : -1;
+
             byte* ptBytes = ptrBytes.PtrArray;//creo que optmizo un poquito al no entrar en la propiedad :D
             for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ; leftToRight? i<=f: i >= f; i+=direccion)
             {
