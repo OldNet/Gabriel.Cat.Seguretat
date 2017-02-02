@@ -147,7 +147,7 @@ namespace Gabriel.Cat.Extension
 
             for (long i = leftToRight ? 0 : lenght - 1, f = leftToRight ? lenght- 1 : 0; leftToRight ? i <= f : i >= f; i += direccion)
             {
-                posAux = (ByteEncrypt.CalucloNumeroCirfrado(password, level, order, (int)i) + i) % lenght;
+                posAux = (ByteEncrypt.CalucloNumeroCirfrado(password, level, order,i) + i) % lenght;
                 aux = ptrChars[posAux];
                 ptrChars[posAux] = ptrChars[i];
                 ptrChars[i] = aux;
