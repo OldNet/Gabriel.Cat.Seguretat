@@ -30,14 +30,11 @@ namespace Gabriel.Cat.Extension
 	}
 	public enum LevelEncrypt
 	{
-		//la solucion al problema :D
-		//los metodos tienen que cifrar teniendo en cuenta que un char son dos bytes y que byte[] puede ser impar y para que char no me de problema tiene que ser par siempre!!
-		//poner valores par :) asi siempre sera par el cambio :D
 		Lowest,
-		Low = 2,
-		Normal = 4,
-		High = 8,
-		Highest = 16
+		Low,
+		Normal,
+		High,
+		Highest
 	}
 	#endregion
 	public static class ByteEncrypt
@@ -156,7 +153,7 @@ namespace Gabriel.Cat.Extension
 
         internal static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
 		{
-			return  Serializar.ToUShort(new byte[] { password.DameElementoActual(order, pos), password.DameElementoActual(order, pos + 1) }) * ((int)level+1);
+			return  Serializar.ToUShort(new byte[] { password.DameElementoActual(order, pos), password.DameElementoActual(order, pos + 1) }) * ((int)level+1)*2;
 		}
         internal static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, long pos)
         {
@@ -170,30 +167,39 @@ namespace Gabriel.Cat.Extension
             long longitudArray = bytes.LongLength;
 			int numBytesRandom;
             long pos = 0;
-			//calculo la longitud final
-			for (long i = 0,f= bytes.LongLength; i <= f; i++)
-				longitudArray += CalucloNumeroCirfrado(password, level, order, i);
+            //calculo la longitud final
+            for (long i = 0, f = bytes.LongLength; i <= f; i++)
+            {
+                longitudArray += CalucloNumeroCirfrado(password, level, order, pos);
+                longitudArray++;//sumo el caracter a cifrar
+                pos += 2;
+            }
+            longitudArray--;//el ultimo no existe :D
 			bytesDisimulats = new byte[longitudArray];
+            pos = 0;
 			unsafe {
+                byte* ptrBytesDisimulats,ptrBytes;
 				bytesDisimulats.UnsafeMethod((unsBytesDisimulats) => bytes.UnsafeMethod(unsBytes => {
+                    ptrBytesDisimulats = unsBytesDisimulats.PtrArray;
+                    ptrBytes = unsBytes.PtrArray;
 					for (long i = 0,f=longitudArray- CalucloNumeroCirfrado(password, level, order, bytes.LongLength); i < f; i++) {
 						//recorro la array de bytes y pongo los bytes nuevos que tocan
 						numBytesRandom = CalucloNumeroCirfrado(password, level, order, pos);
 						for (int j = 0; j < numBytesRandom; j++) {
-							*unsBytesDisimulats.PtrArray = (byte)MiRandom.Next(byte.MaxValue);
-							unsBytesDisimulats.PtrArray++;
+							*ptrBytesDisimulats = (byte)MiRandom.Next(byte.MaxValue+1);
+                            ptrBytesDisimulats++;
 						}
-						*unsBytesDisimulats.PtrArray = *unsBytes.PtrArray;
-						unsBytesDisimulats.PtrArray++;
-						unsBytes.PtrArray++;
+						*ptrBytesDisimulats = *ptrBytes;
+                        ptrBytesDisimulats++;
+                        ptrBytes++;
                         pos += 2;
 					}
                     //para disumular el ultimo!
                     numBytesRandom = CalucloNumeroCirfrado(password, level, order, pos);
                     for (int j = 0; j < numBytesRandom; j++)
                     {
-                        *unsBytesDisimulats.PtrArray = (byte)MiRandom.Next(byte.MaxValue);
-                        unsBytesDisimulats.PtrArray++;
+                        *ptrBytesDisimulats = (byte)MiRandom.Next(byte.MaxValue+1);
+                        ptrBytesDisimulats++;
                     }
                 }));
 			}
@@ -206,29 +212,36 @@ namespace Gabriel.Cat.Extension
 			byte[] bytesTrobats;
 			long longitudAux = bytes.LongLength;
 			long longitud = 0;
-			int j = 0;
+            long pos = 0;
 			//calculo la longitud original
 			while (longitudAux > 0) {
 				//le resto los caracteres random
-				longitudAux -= CalucloNumeroCirfrado(password, level, order, j++);
+				longitudAux -= CalucloNumeroCirfrado(password, level, order, pos);
 				//quito el caracter original
 				longitudAux--;
 				//lo cuento
 				longitud++;
+                pos += 2;
 			}
-			bytesTrobats = new byte[longitud-1];//el ultimo es random tambien para disimular el ultimo real
-			unsafe {
+			bytesTrobats = new byte[longitud-2];//el ultimo es random tambien para disimular el ultimo real
+            pos = 0;
+
+            unsafe {
+                byte* ptrBytes, ptrBytesTrobats;
 				bytesTrobats.UnsafeMethod((unsBytesTrobats) => bytes.UnsafeMethod(unsBytes => {
-                    for (long i = 0,pos=0,f=longitud-1; i <f ; i++,pos+=2)
+                    ptrBytesTrobats = unsBytesTrobats.PtrArray;
+                    ptrBytes = unsBytes.PtrArray;
+                    for (long i = 0,f=longitud-1; i <f ; i++)
                     {
                         //recorro la array de bytes y pongo los bytes nuevos que tocan
-                        unsBytes.PtrArray += CalucloNumeroCirfrado(password, level, order,pos);
+                        ptrBytesTrobats += CalucloNumeroCirfrado(password, level, order,pos);
                         //me salto los bytes random
-                        *unsBytesTrobats.PtrArray = *unsBytes.PtrArray;
+                        *ptrBytesTrobats = *ptrBytes;
                         //pongo el byte original
-                        unsBytesTrobats.PtrArray++;
+                        ptrBytesTrobats++;
                         //avanzo
-                        unsBytes.PtrArray++;
+                        ptrBytes++;
+                        pos += 2;
                     }
                 }));
 			}

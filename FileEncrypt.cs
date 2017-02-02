@@ -191,7 +191,7 @@ namespace Gabriel.Cat.Seguretat
                 numBytesRandom =ByteEncrypt.CalucloNumeroCirfrado(password, level, order,pos);
                 for (int j = 0; j < numBytesRandom; j++)
                 {
-                   swOut.Write((byte)MiRandom.Next(byte.MaxValue));
+                   swOut.Write((byte)MiRandom.Next(byte.MaxValue+1));
                 }
                 swOut.Write((byte)srIn.ReadByte());
                 pos += 2;
@@ -199,13 +199,13 @@ namespace Gabriel.Cat.Seguretat
             numBytesRandom = ByteEncrypt.CalucloNumeroCirfrado(password, level, order, pos);
             for (int j = 0; j < numBytesRandom; j++)
             {
-                swOut.Write((byte)MiRandom.Next(byte.MaxValue));
+                swOut.Write((byte)MiRandom.Next(byte.MaxValue+1));
             }
         }
         private static void DencryptDisimulat(BinaryReader srIn, BinaryWriter swOut, byte[] password, LevelEncrypt level, Ordre order)
         {
             long pos = 0;
-            for (long i = srIn.BaseStream.Position+ ByteEncrypt.CalucloNumeroCirfrado(password, level, order, pos); i < srIn.BaseStream.Length; i += ByteEncrypt.CalucloNumeroCirfrado(password, level, order, pos))
+            for (long i = srIn.BaseStream.Position+ ByteEncrypt.CalucloNumeroCirfrado(password, level, order, pos)+1; i < srIn.BaseStream.Length; i += ByteEncrypt.CalucloNumeroCirfrado(password, level, order, pos)+1)
             {
                 srIn.BaseStream.Position = i;
                 swOut.Write((byte)srIn.ReadByte());
