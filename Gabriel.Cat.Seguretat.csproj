@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="ByteEncrypt.cs" />
     <Compile Include="ClaseExtension.cs" />
+    <Compile Include="FileEncrypt.cs" />
     <Compile Include="Key.cs" />
     <Compile Include="StringEncrypt.cs" />
     <Compile Include="XifraBitmap.cs" />
