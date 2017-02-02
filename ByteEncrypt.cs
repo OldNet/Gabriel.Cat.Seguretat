@@ -168,21 +168,19 @@ namespace Gabriel.Cat.Extension
 			int numBytesRandom;
             long pos = 0;
             //calculo la longitud final
-            for (long i = 0, f = bytes.LongLength; i <= f; i++)
+            for (long i = 0, f = longitudArray; i <= f; i++)
             {
                 longitudArray += CalucloNumeroCirfrado(password, level, order, pos);
-                longitudArray++;//sumo el caracter a cifrar
                 pos += 2;
             }
-            longitudArray--;//el ultimo no existe :D
-			bytesDisimulats = new byte[longitudArray];
+            bytesDisimulats = new byte[longitudArray];
             pos = 0;
 			unsafe {
                 byte* ptrBytesDisimulats,ptrBytes;
 				bytesDisimulats.UnsafeMethod((unsBytesDisimulats) => bytes.UnsafeMethod(unsBytes => {
                     ptrBytesDisimulats = unsBytesDisimulats.PtrArray;
                     ptrBytes = unsBytes.PtrArray;
-					for (long i = 0,f=longitudArray- CalucloNumeroCirfrado(password, level, order, bytes.LongLength); i < f; i++) {
+					for (long i = 0,f=bytes.Length; i < f; i++) {
 						//recorro la array de bytes y pongo los bytes nuevos que tocan
 						numBytesRandom = CalucloNumeroCirfrado(password, level, order, pos);
 						for (int j = 0; j < numBytesRandom; j++) {
@@ -223,7 +221,8 @@ namespace Gabriel.Cat.Extension
 				longitud++;
                 pos += 2;
 			}
-			bytesTrobats = new byte[longitud-2];//el ultimo es random tambien para disimular el ultimo real
+            longitud--;
+			bytesTrobats = new byte[longitud];//el ultimo es random tambien para disimular el ultimo real
             pos = 0;
 
             unsafe {
@@ -231,10 +230,10 @@ namespace Gabriel.Cat.Extension
 				bytesTrobats.UnsafeMethod((unsBytesTrobats) => bytes.UnsafeMethod(unsBytes => {
                     ptrBytesTrobats = unsBytesTrobats.PtrArray;
                     ptrBytes = unsBytes.PtrArray;
-                    for (long i = 0,f=longitud-1; i <f ; i++)
+                    for (long i = 0,f=longitud+1; i <f ; i++)
                     {
                         //recorro la array de bytes y pongo los bytes nuevos que tocan
-                        ptrBytesTrobats += CalucloNumeroCirfrado(password, level, order,pos);
+                        ptrBytes += CalucloNumeroCirfrado(password, level, order,pos);
                         //me salto los bytes random
                         *ptrBytesTrobats = *ptrBytes;
                         //pongo el byte original
