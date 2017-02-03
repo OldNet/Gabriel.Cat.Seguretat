@@ -151,13 +151,13 @@ namespace Gabriel.Cat.Extension
 		}
 
 
-        internal static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
+        internal static int CalculoNumeroCifrado(byte[] password, LevelEncrypt level, Ordre order, int pos)
 		{
 			return  Serializar.ToUShort(new byte[] { password.DameElementoActual(order, pos), password.DameElementoActual(order, pos + 1) }) * ((int)level+1)*2;
 		}
-        internal static int CalucloNumeroCirfrado(byte[] password, LevelEncrypt level, Ordre order, long pos)
+        internal static int CalculoNumeroCifrado(byte[] password, LevelEncrypt level, Ordre order, long pos)
         {
-            return CalucloNumeroCirfrado(password, level, order, (int)(pos % int.MaxValue));
+            return CalculoNumeroCifrado(password, level, order, (int)(pos % int.MaxValue));
         }
 
         #region disimulat Encrypt
@@ -170,7 +170,7 @@ namespace Gabriel.Cat.Extension
             //calculo la longitud final
             for (long i = 0, f = longitudArray; i <= f; i++)
             {
-                longitudArray += CalucloNumeroCirfrado(password, level, order, pos);
+                longitudArray += CalculoNumeroCifrado(password, level, order, pos);
                 pos += 2;
             }
             bytesDisimulats = new byte[longitudArray];
@@ -182,7 +182,7 @@ namespace Gabriel.Cat.Extension
                     ptrBytes = unsBytes.PtrArray;
 					for (long i = 0,f=bytes.Length; i < f; i++) {
 						//recorro la array de bytes y pongo los bytes nuevos que tocan
-						numBytesRandom = CalucloNumeroCirfrado(password, level, order, pos);
+						numBytesRandom = CalculoNumeroCifrado(password, level, order, pos);
 						for (int j = 0; j < numBytesRandom; j++) {
 							*ptrBytesDisimulats = (byte)MiRandom.Next(byte.MaxValue+1);
                             ptrBytesDisimulats++;
@@ -193,7 +193,7 @@ namespace Gabriel.Cat.Extension
                         pos += 2;
 					}
                     //para disumular el ultimo!
-                    numBytesRandom = CalucloNumeroCirfrado(password, level, order, pos);
+                    numBytesRandom = CalculoNumeroCifrado(password, level, order, pos);
                     for (int j = 0; j < numBytesRandom; j++)
                     {
                         *ptrBytesDisimulats = (byte)MiRandom.Next(byte.MaxValue+1);
@@ -214,7 +214,7 @@ namespace Gabriel.Cat.Extension
 			//calculo la longitud original
 			while (longitudAux > 0) {
 				//le resto los caracteres random
-				longitudAux -= CalucloNumeroCirfrado(password, level, order, pos);
+				longitudAux -= CalculoNumeroCifrado(password, level, order, pos);
 				//quito el caracter original
 				longitudAux--;
 				//lo cuento
@@ -233,7 +233,7 @@ namespace Gabriel.Cat.Extension
                     for (long i = 0,f=longitud+1; i <f ; i++)
                     {
                         //recorro la array de bytes y pongo los bytes nuevos que tocan
-                        ptrBytes += CalucloNumeroCirfrado(password, level, order,pos);
+                        ptrBytes += CalculoNumeroCifrado(password, level, order,pos);
                         //me salto los bytes random
                         *ptrBytesTrobats = *ptrBytes;
                         //pongo el byte original
@@ -258,7 +258,7 @@ namespace Gabriel.Cat.Extension
                     ptrBytesOri = unsBytes.PtrArray;
                     ptrBytesCesarEncrypt = unsByteEncriptat.PtrArray;
 					for (long i = 0,pos=0; i < unsBytes.Length; i++,pos+=2) {
-                         sumaCesar = CalucloNumeroCirfrado(password, level, order, pos);
+                         sumaCesar = CalculoNumeroCifrado(password, level, order, pos);
                         *ptrBytesCesarEncrypt = (byte)((*ptrBytesOri + sumaCesar) %(byte.MaxValue+1));
                         ptrBytesCesarEncrypt++;
                         ptrBytesOri++;
@@ -279,7 +279,7 @@ namespace Gabriel.Cat.Extension
                     ptrBytesCesarDecrypt = unsByteDesencryptat.PtrArray;
 					for (long i = 0,pos=0; i < unsBytes.Length; i++,pos+=2)
                     {
-                        restaCesar = CalucloNumeroCirfrado(password, level, order, pos);
+                        restaCesar = CalculoNumeroCifrado(password, level, order, pos);
                         preByte = *ptrBytesCesarEcnrypt - restaCesar;
 
                         if (preByte < byte.MinValue)
@@ -335,7 +335,7 @@ namespace Gabriel.Cat.Extension
             byte* ptBytes = ptrBytes.PtrArray;//creo que optmizo un poquito al no entrar en la propiedad :D
             for(long i= leftToRight ? 0 : ptrBytes.Length - 1,f= leftToRight ? ptrBytes.Length - 1: 0  ; leftToRight? i<=f: i >= f; i+=direccion)
             {
-                posAux = (CalucloNumeroCirfrado(password, level, order, i)+i) % ptrBytes.Length;
+                posAux = (CalculoNumeroCifrado(password, level, order, i)+i) % ptrBytes.Length;
                 aux = ptBytes[posAux];
                 ptBytes[posAux] = ptBytes[i];
                 ptBytes[i] = aux;
