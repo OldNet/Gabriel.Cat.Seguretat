@@ -277,6 +277,7 @@ namespace Gabriel.Cat.Seguretat
                 if (setDefaultMethodsEncrypt)
                 {
                     itemsEncryptData.Add(new ItemEncryptationData(MetodoCesar));
+                    itemsEncryptData.Add(new ItemEncryptationData(MetodoPerdut));
                     itemsEncryptPassword.Add(new ItemEncryptationPassword(MetodoHash));
                 }
                 strOneKey.Position = strDecrypted.Position;
