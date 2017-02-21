@@ -313,12 +313,14 @@ namespace Gabriel.Cat.Seguretat
         public byte[] Encrypt(byte[] data)
         {
             ItemEncryptationData itemEncryptData;
-            ItemEncryptationPassword itemEncryptPassword;
+            ItemEncryptationPassword itemEncryptPassword=null;
             for (int i = 0, f = itemsKey.Count; i < f; i++)
             {
                 itemEncryptData = itemsEncryptData[itemsKey[i].MethodData];
-                itemEncryptPassword = itemsEncryptPassword[itemsKey[i].MethodPassword];
-                data = itemEncryptData.Encrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
+                if (itemsEncryptPassword.Count > 0)
+                    itemEncryptPassword = itemsEncryptPassword[itemsKey[i].MethodPassword];
+
+                data = itemEncryptData.Encrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password) ?? itemsKey[i].Password);
             }
             return data;
         }
@@ -329,13 +331,15 @@ namespace Gabriel.Cat.Seguretat
         public byte[] Decrypt(byte[] data)
         {
             ItemEncryptationData itemEncryptData;
-            ItemEncryptationPassword itemEncryptPassword;
+            ItemEncryptationPassword itemEncryptPassword=null;
             for (int i = itemsKey.Count - 1; i >= 0; i--)
             {
 
                 itemEncryptData = itemsEncryptData[itemsKey[i].MethodData];
+                if(itemsEncryptPassword.Count>0)
                 itemEncryptPassword = itemsEncryptPassword[itemsKey[i].MethodPassword];
-                data = itemEncryptData.Decrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password));
+            
+                data = itemEncryptData.Decrypt(data, itemEncryptPassword.Encrypt(itemsKey[i].Password) ?? itemsKey[i].Password);
             }
             return data;
         }
