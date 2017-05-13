@@ -367,7 +367,7 @@ namespace Gabriel.Cat.Extension
 			dataEncryptAct = dataEncrypt.DameElementoActual(order, numCanvis);
 			passwordActual = passwords.DameElementoActual(order, numCanvis);
 			byteResultAux = metodo(dataSplited[0], passwordActual, dataEncryptAct, passwordEncryptAct, level, order);
-			if (data.BuscarArray(bytesChange) > -1)//si tiene marca la pongo
+			if (data.SearchArray(bytesChange) > -1)//si tiene marca la pongo
              byteResultAux = byteResultAux.AddArray(bytesChange);
 			dataResultSplited.Add(byteResultAux);
 			numCanvis++;
