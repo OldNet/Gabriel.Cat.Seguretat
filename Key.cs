@@ -189,7 +189,7 @@ namespace Gabriel.Cat.Seguretat
             static KeyBinary()
             {
                 keyFormat = new Formato();
-                keyFormat.ElementosArchivo.Add(new ElementoIEnumerableBinario(new ItemKeyBinary(), ElementoIEnumerableBinario.LongitudBinaria.Long));
+                keyFormat.ElementosArchivo.Add(new ElementoIListBinario<ItemKey>(new ItemKeyBinary()));
             }
             public static byte[] GetBytes(Key key)
             {
